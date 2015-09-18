@@ -1,0 +1,143 @@
+_ = require "lodash"
+{join} = require "path"
+
+gulp = require "gulp"
+gutil = require "gulp-util"
+
+memoizee = require "memoizee"
+nunjucks = require "gulp-nunjucks-html"
+livereload = require "gulp-livereload"
+sass = require "gulp-sass"
+changed = require "gulp-changed"
+watch = require "gulp-watch"
+webpack = require "webpack-stream"
+
+lr = require "connect-livereload"
+st = require "st"
+portfinder = require "portfinder"
+express = require "express"
+
+markdown = require "nunjucks-markdown"
+marked = require "marked"
+highlightjs = require "highlight.js"
+
+
+# Path configurations
+
+prefix = "site"
+
+paths =
+	build: 			".build"
+	templates: 		"templates"
+	pages: 			"pages"
+	static: 		"static"
+	scss: 			"css"
+	javascript: 	"scripts"
+	coffeescript: 	"scripts"
+
+projectPath = 	(path="", fileTypes="") -> join(__dirname, prefix, path, fileTypes)
+buildPath = 	(path="", fileTypes="") -> join(__dirname, paths.build, path, fileTypes)
+
+
+# Template engine
+
+marked.setOptions
+	highlight: (code, lang) ->
+		return highlightjs.highlightAuto(code, ["coffeescript"]).value
+
+setupNunjucks = (env) ->
+	markdown.register(env, memoizee(marked))
+	return env
+
+
+# Webpack
+
+webpackConfig = 
+	module: loaders: [{ test: /\.coffee$/, loader: "coffee" }]
+	resolve: extensions: ["", ".coffee", ".js"]
+	output:
+		filename: "[name].js"
+	cache: true
+	devtool: "sourcemap"
+
+webpackConfigPlugins = [
+	new webpack.webpack.optimize.DedupePlugin(),
+	new webpack.webpack.optimize.UglifyJsPlugin mangle: false, compress: {warnings: false}
+]
+
+webpackConfigJavaScript = _.cloneDeep(webpackConfig)
+webpackConfigJavaScript.output.filename = "[name].js"
+webpackConfigJavaScript.plugins = webpackConfigPlugins
+webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
+webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
+webpackConfigCoffeeScript.plugins = webpackConfigPlugins
+
+webpackJavaScript = webpack(webpackConfigJavaScript)
+webpackCoffeeScript = webpack(webpackConfigCoffeeScript)
+
+
+# Gulp Tasks
+
+gulp.task "static", ->
+	gulp.src(projectPath(paths.static, "**/*.*"))
+		.pipe(changed(buildPath(paths.static, "**/*.*")))
+		.pipe(gulp.dest(buildPath(paths.static)))
+		.pipe(livereload())
+
+gulp.task "pages", ->
+	gulp.src(projectPath(paths.pages, "**/*"))
+		.pipe(nunjucks(
+			searchPaths: projectPath(paths.templates)
+			setUp: setupNunjucks))
+		.pipe(gulp.dest(buildPath()))
+		.pipe(livereload())
+
+gulp.task "scss", ->
+	gulp.src(projectPath(paths.scss, "*.scss"))
+		.pipe(sass().on("error", sass.logError))
+		.pipe(gulp.dest(buildPath(paths.scss)))
+		.pipe(livereload())
+
+gulp.task "coffeescript", ->
+	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
+		.pipe(webpack(webpackConfigCoffeeScript))
+		.pipe(gulp.dest(buildPath(paths.coffeescript)))
+		.pipe(livereload())
+
+gulp.task "javascript", ->
+	gulp.src(projectPath(paths.javascript, "*.js"))
+		.pipe(webpack(webpackConfigJavaScript))
+		.pipe(gulp.dest(buildPath(paths.javascript)))
+		.pipe(livereload())
+
+gulp.task "watch", ["build"], (cb) ->
+
+	watch [
+		projectPath(paths.pages, "**/*.html"),
+		projectPath(paths.pages, "**/*.md"),
+		projectPath(paths.templates, "**/*.html"),
+		projectPath(paths.templates, "**/*.md")
+	], (err, events) -> gulp.start("pages")
+
+	watch [projectPath(paths.static, "**/*.*")], (err, events) -> gulp.start("static")
+	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> gulp.start("scss")
+	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> gulp.start("coffeescript")
+	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> gulp.start("javascript")
+
+	gulp.start("server", cb)
+
+gulp.task "server", (cb) ->
+
+	app = express()
+	app.use(lr())
+	app.use(express.static(buildPath()))
+
+	portfinder.getPort (err, port)  ->
+		app.listen(port)
+		livereload.listen(basePath:buildPath())
+		gutil.log(gutil.colors.green("Serving at: http://localhost:#{port}"))
+		gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
+		cb(err)
+
+gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
+gulp.task("default", ["server"])
