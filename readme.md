@@ -1,11 +1,11 @@
 ### Cactus with Gulp
 
-This is a reimplementation of Cactus' ideas with Gulp. No fancy app, just a command line tool. The main goal for this was speed, as larger Cactus projects became slow to work on. Other goals are portability so everyone can start building right away. Next to that, the added benefits are minified and compiled Java/Coffee Script, the posibilities to run tests, etc.
+This is a reimplementation of Cactus' ideas with [Gulp](http://gulpjs.com). No fancy app, just a command line tool. The main goal for this was speed, as larger Cactus projects became slow to work on. Other goals are portability so everyone can start building right away. Next to that, the added benefits are minified and compiled Java/Coffee Script, the posibilities to run tests, etc.
 
 #### Features
 
 - Built in server with automatic reloading on changes, based on [Express](http://expressjs.com) and [Live Reload](https://github.com/napcs/node-livereload)
-- Template engine (like Django, with extend) based on [Nunjucks](https://mozilla.github.io/nunjucks/) [Docs](https://mozilla.github.io/nunjucks/templating.html)
+- Template engine (like Django, with extend) based on [Nunjucks](https://mozilla.github.io/nunjucks/) – [Docs](https://mozilla.github.io/nunjucks/templating.html)
 - Markdown support (with `{% markdown %}`) based on [Marked](https://github.com/chjj/marked)
 - Code highlighting in Markdown, based on [Highlight.js](https://highlightjs.org)
 - Support for SCSS and includes, including minification sourcemaps.
@@ -50,8 +50,10 @@ So you can find this structure in `.build` after a make build command.
 
 #### Todo
 
+- CSS Minification
 - Page contexts
 - Some form of deploying with rsync, s3
 - Custom plugins
 - Port blog plugin
 - Tests
+- Make sure uploaded dirs can't get touched by watch
