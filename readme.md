@@ -47,4 +47,11 @@ So you can find this structure in `.build` after a make build command.
 /scripts/main.coffee.js.map	from: /scripts/main.coffee			Coffee sourcemap
 /scripts/tracker.js			from: /scripts/tracker.js			JavaScript minified
 ```
-	
+
+#### Todo
+
+- Page contexts
+- Some form of deploying with rsync, s3
+- Custom plugins
+- Port blog plugin
+- Tests
