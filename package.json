@@ -35,8 +35,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/motif/CactusGulp.git"
+    "url": "https://github.com/motif/moonbase.git"
   },
   "author": "Koen Bok",
-  "license": "ISC"
+  "license": "MIT"
 }
