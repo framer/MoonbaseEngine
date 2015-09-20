@@ -25,7 +25,8 @@ Highlights = require "highlights"
 
 # Path configurations
 
-prefix = "site"
+# We are assuming we're in node_modules
+workingPath = join(process.cwd(), "..", "..")
 
 paths =
 	build: 			".build"
@@ -36,8 +37,8 @@ paths =
 	javascript: 	"scripts"
 	coffeescript: 	"scripts"
 
-projectPath = 	(path="", fileTypes="") -> join(__dirname, prefix, path, fileTypes)
-buildPath = 	(path="", fileTypes="") -> join(__dirname, paths.build, path, fileTypes)
+projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
+buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
 
 
 # Template engine
