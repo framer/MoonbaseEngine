@@ -11,6 +11,7 @@ sass = require "gulp-sass"
 changed = require "gulp-changed"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
+plumber = require "gulp-plumber"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -19,7 +20,7 @@ express = require "express"
 
 markdown = require "nunjucks-markdown"
 marked = require "marked"
-highlightjs = require "highlight.js"
+Highlights = require "highlights"
 
 
 # Path configurations
@@ -41,12 +42,16 @@ buildPath = 	(path="", fileTypes="") -> join(__dirname, paths.build, path, fileT
 
 # Template engine
 
+highlighter = new Highlights()
+
 marked.setOptions
-	highlight: (code, lang) ->
-		return highlightjs.highlightAuto(code, ["coffeescript"]).value
+	highlight: (code, language) ->
+		return highlighter.highlightSync
+			fileContents: code
+			scopeName: language
 
 setupNunjucks = (env) ->
-	markdown.register(env, memoizee(marked))
+	markdown.register(env, marked)
 	return env
 
 
@@ -62,7 +67,10 @@ webpackConfig =
 
 webpackConfigPlugins = [
 	new webpack.webpack.optimize.DedupePlugin(),
-	new webpack.webpack.optimize.UglifyJsPlugin mangle: false, compress: {warnings: false}
+	new webpack.webpack.optimize.UglifyJsPlugin
+		mangle: false
+		compress:
+			warnings: true
 ]
 
 webpackConfigJavaScript = _.cloneDeep(webpackConfig)
@@ -71,10 +79,6 @@ webpackConfigJavaScript.plugins = webpackConfigPlugins
 webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
 webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
 webpackConfigCoffeeScript.plugins = webpackConfigPlugins
-
-webpackJavaScript = webpack(webpackConfigJavaScript)
-webpackCoffeeScript = webpack(webpackConfigCoffeeScript)
-
 
 # Gulp Tasks
 
@@ -86,6 +90,7 @@ gulp.task "static", ->
 
 gulp.task "pages", ->
 	gulp.src(projectPath(paths.pages, "**/*"))
+		.pipe(plumber())
 		.pipe(nunjucks(
 			searchPaths: projectPath(paths.templates)
 			setUp: setupNunjucks))

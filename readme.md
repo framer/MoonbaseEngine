@@ -7,7 +7,7 @@ This is a reimplementation of Cactus' ideas with [Gulp](http://gulpjs.com). No f
 - Built in server with automatic reloading on changes, based on [Express](http://expressjs.com) and [Live Reload](https://github.com/napcs/node-livereload)
 - Template engine (like Django, with extend) based on [Nunjucks](https://mozilla.github.io/nunjucks/) – [Docs](https://mozilla.github.io/nunjucks/templating.html)
 - Markdown support (with `{% markdown %}`) based on [Marked](https://github.com/chjj/marked)
-- Code highlighting in Markdown, based on [Highlight.js](https://highlightjs.org)
+- Code highlighting in Markdown, based on [Highlights](https://github.com/atom/highlights)
 - Support for SCSS and includes, including minification sourcemaps.
 - Support for Java/Coffee Script (with minification and sourcemaps), based on [Webpack](https://webpack.github.io)
 
@@ -50,6 +50,7 @@ So you can find this structure in `.build` after a make build command.
 
 #### Todo
 
+- Better error reporting
 - CSS Minification
 - Page contexts
 - Some form of deploying with rsync, s3
@@ -57,3 +58,4 @@ So you can find this structure in `.build` after a make build command.
 - Port blog plugin
 - Tests
 - Make sure uploaded dirs can't get touched by watch
+- Maybe move /subdir/subdir.index.html to /subdir/index.html
