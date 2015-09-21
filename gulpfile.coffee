@@ -25,17 +25,17 @@ Highlights = require "highlights"
 
 # Path configurations
 
-# We are assuming we're in node_modules
-workingPath = join(process.cwd(), "..", "..")
+# We are assuming we're in node_modules for now
+workingPath = process.cwd()
 
 paths =
 	build: 			".build"
 	templates: 		"templates"
 	pages: 			"pages"
-	static: 		"static"
-	scss: 			"css"
-	javascript: 	"scripts"
-	coffeescript: 	"scripts"
+	static: 		"assets/static"
+	scss: 			"assets/css"
+	javascript: 	"assets/scripts"
+	coffeescript: 	"assets/scripts"
 
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)

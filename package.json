@@ -1,13 +1,14 @@
 {
   "name": "moonbase",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cactus through Gulp",
-  "main": "index.js",
+  "main": "moonbase.coffee",
   "directories": {
     "doc": "docs"
   },
   "dependencies": {
     "coffee-loader": "^0.7.2",
+    "commander": "^2.8.1",
     "connect-livereload": "^0.5.3",
     "express": "^4.13.3",
     "gulp": "^3.9.0",
@@ -32,6 +33,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "moonbase" : "moonbase.coffee"
   },
   "repository": {
     "type": "git",

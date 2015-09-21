@@ -13,8 +13,9 @@ This is a reimplementation of Cactus' ideas with [Gulp](http://gulpjs.com). No f
 
 #### Usage
 
-- Clone this repository.
 - Make sure you have Node.js installed (easiest way is through [Homebrew](http://brew.sh)).
+- Install moonbase in your project with `npm install --save moonbase`.
+- Add the example `extras/Makefile` from extras to your project.
 - Run `make` to start an auto refreshing web server.
 - Change some content in the `site` folder (see layout below).
 - Run `make build` to generate a site for uploading.
@@ -59,3 +60,4 @@ So you can find this structure in `.build` after a make build command.
 - Tests
 - Make sure uploaded dirs can't get touched by watch
 - Maybe move /subdir/subdir.index.html to /subdir/index.html
+- Maybe add some command line tool

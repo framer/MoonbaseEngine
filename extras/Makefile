@@ -1,4 +1,4 @@
-NODE_MODULES = ./node_modules
+NODE_MODULES = ./node_modules/moonbase/node_modules
 NODE_BIN = $(NODE_MODULES)/.bin
 
 BREW_DEPENDENCIES = node rsync
