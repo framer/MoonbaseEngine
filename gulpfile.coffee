@@ -1,5 +1,6 @@
 _ = require "lodash"
 {join} = require "path"
+fs = require "fs"
 
 gulp = require "gulp"
 gutil = require "gulp-util"
@@ -12,6 +13,9 @@ changed = require "gulp-changed"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
+sprite = require("css-sprite").stream
+merge = require "merge-stream"
+gulpif = require "gulp-if"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -36,6 +40,7 @@ paths =
 	scss: 			"assets/css"
 	javascript: 	"assets/scripts"
 	coffeescript: 	"assets/scripts"
+	sprites:		"assets/sprites"
 
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
@@ -98,7 +103,7 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
-gulp.task "scss", ->
+gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(sass().on("error", sass.logError))
 		.pipe(gulp.dest(buildPath(paths.scss)))
@@ -116,6 +121,27 @@ gulp.task "javascript", ->
 		.pipe(gulp.dest(buildPath(paths.javascript)))
 		.pipe(livereload())
 
+gulp.task "sprites", ->
+
+	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
+		fs.lstatSync(join(projectPath(paths.sprites), fileName)).isDirectory()
+
+	merge sprites.map (fileName) ->
+		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
+			.pipe(changed(buildPath(paths.sprites)))
+			.pipe(sprite({
+				name: fileName,
+				style: "#{fileName}.scss",
+				cssPath: "/assets/sprites/",
+				processor: "scss"
+			}))
+			.pipe(gulpif("*.png", 
+				gulp.dest(buildPath(paths.sprites)), 
+				gulp.dest(projectPath(paths.sprites))))
+			.pipe(livereload())
+
+
+
 gulp.task "watch", ["build"], (cb) ->
 
 	watch [
@@ -129,6 +155,7 @@ gulp.task "watch", ["build"], (cb) ->
 	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> gulp.start("scss")
 	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> gulp.start("coffeescript")
 	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> gulp.start("javascript")
+	watch [projectPath(paths.sprites, "**/*.png")], (err, events) -> gulp.start("scss")
 
 	gulp.start("server", cb)
 

@@ -1,0 +1,39 @@
+$icon-arrow: -4px -4px 6px 10px;
+$icon-companies: -4px -22px 32px 31px;
+$icon-conferences: -4px -61px 32px 31px;
+
+@mixin sprite-width($sprite) {
+  width: nth($sprite, 3);
+}
+
+@mixin sprite-height($sprite) {
+  height: nth($sprite, 4);
+}
+
+@function sprite-width($sprite) {
+  @return nth($sprite, 3);
+}
+
+@function sprite-height($sprite) {
+  @return nth($sprite, 4);
+}
+
+@mixin sprite-position($sprite) {
+  $sprite-offset-x: nth($sprite, 1);
+  $sprite-offset-y: nth($sprite, 2);
+  background-position: $sprite-offset-x  $sprite-offset-y;
+}
+
+@mixin sprite($sprite) {
+  @include sprite-position($sprite);
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: block;
+  @include sprite-width($sprite);
+  @include sprite-height($sprite);
+}
+
+.icon {
+  background-image: url('/assets/sprites/sprite1x.png');
+}
+
