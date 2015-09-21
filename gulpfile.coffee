@@ -67,7 +67,9 @@ setupNunjucks = (env) ->
 # Webpack
 
 webpackConfig = 
-	module: loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
+	module:
+		resolveLoader: {root: join(__dirname, "node_modules")}
+		loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
 	resolve: extensions: ["", ".coffee", ".js"]
 	output:
 		filename: "[name].js"
@@ -106,7 +108,7 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
-gulp.task "scss", ["sprites"], ->
+gulp.task "scss", ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
@@ -142,7 +144,7 @@ gulp.task "sprites", ->
 
 	merge sprites.map (fileName) ->
 		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
-			.pipe(changed(buildPath(paths.sprites)))
+			.pipe(changed(buildPath(paths.sprites, "#{fileName}/*.png")))
 			.pipe(sprite(
 				name: fileName,
 				style: "#{fileName}.scss",
@@ -167,22 +169,27 @@ gulp.task "watch", ["build"], (cb) ->
 	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> gulp.start("scss")
 	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> gulp.start("coffeescript")
 	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> gulp.start("javascript")
-	watch [projectPath(paths.sprites, "**/*.png")], (err, events) -> gulp.start("scss")
+	watch [projectPath(paths.sprites, "*/*.png")], (err, events) -> gulp.start("scss")
 
 	gulp.start("server", cb)
 
 gulp.task "server", (cb) ->
 
-	app = express()
-	app.use(lr())
-	app.use(express.static(buildPath()))
+	portfinder.getPort (err, serverPort)  ->
+		portfinder.basePort = 10000
+		portfinder.getPort (err, livereloadPort)  ->
 
-	portfinder.getPort (err, port)  ->
-		app.listen(port)
-		livereload.listen(basePath:buildPath())
-		gutil.log(gutil.colors.green("Serving at: http://localhost:#{port}"))
-		gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
-		cb(err)
+			app = express()
+			app.use(lr(port:livereloadPort))
+			app.use(express.static(buildPath()))
+			app.listen(serverPort)
+
+			livereload.listen(port:livereloadPort, basePath:buildPath())
+
+			gutil.log(gutil.colors.green("Serving at: http://localhost:#{serverPort}"))
+			gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
+
+			cb(err)
 
 gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
 gulp.task("default", ["server"])
