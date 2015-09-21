@@ -18,6 +18,7 @@ merge = require "merge-stream"
 gulpif = require "gulp-if"
 minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
+emptytask = require "gulp-empty"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -66,7 +67,7 @@ setupNunjucks = (env) ->
 # Webpack
 
 webpackConfig = 
-	module: loaders: [{ test: /\.coffee$/, loader: "coffee" }]
+	module: loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
 	resolve: extensions: ["", ".coffee", ".js"]
 	output:
 		filename: "[name].js"
@@ -109,7 +110,9 @@ gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
-		.pipe(minifycss())
+		.pipe(minifycss(
+			rebase: false
+		))
 		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
@@ -128,8 +131,14 @@ gulp.task "javascript", ->
 
 gulp.task "sprites", ->
 
+	isDirectory = (path) -> fs.lstatSync(path).isDirectory()
+
+	return emptytask unless isDirectory(projectPath(paths.sprites))
+
 	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
 		fs.lstatSync(join(projectPath(paths.sprites), fileName)).isDirectory()
+
+	return emptytask unless sprites.length > 0
 
 	merge sprites.map (fileName) ->
 		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
