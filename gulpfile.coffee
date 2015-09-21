@@ -16,6 +16,8 @@ plumber = require "gulp-plumber"
 sprite = require("css-sprite").stream
 merge = require "merge-stream"
 gulpif = require "gulp-if"
+minifycss = require "gulp-minify-css"
+sourcemaps = require "gulp-sourcemaps"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -105,7 +107,10 @@ gulp.task "pages", ->
 
 gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
+		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
+		.pipe(minifycss())
+		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
 
@@ -129,18 +134,16 @@ gulp.task "sprites", ->
 	merge sprites.map (fileName) ->
 		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
 			.pipe(changed(buildPath(paths.sprites)))
-			.pipe(sprite({
+			.pipe(sprite(
 				name: fileName,
 				style: "#{fileName}.scss",
 				cssPath: "/assets/sprites/",
 				processor: "scss"
-			}))
+			))
 			.pipe(gulpif("*.png", 
 				gulp.dest(buildPath(paths.sprites)), 
 				gulp.dest(projectPath(paths.sprites))))
 			.pipe(livereload())
-
-
 
 gulp.task "watch", ["build"], (cb) ->
 
