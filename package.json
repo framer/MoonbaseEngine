@@ -1,6 +1,6 @@
 {
   "name": "moonbase",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Cactus through Gulp",
   "main": "moonbase.coffee",
   "directories": {
@@ -31,6 +31,7 @@
     "merge-stream": "^1.0.0",
     "nunjucks-markdown": "^1.1.0",
     "portfinder": "^0.4.0",
+    "pretty-hrtime": "^1.0.0",
     "st": "^0.5.5",
     "webpack-stream": "^2.1.0"
   },

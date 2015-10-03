@@ -2,6 +2,9 @@
 
 {normalize, resolve} = require "path"
 gulp = require "gulp"
+gutil = require "gulp-util"
+prettyTime = require "pretty-hrtime"
+
 program = require "commander"
 
 task = "watch"
@@ -22,5 +25,12 @@ console.log "Running #{task} for #{path}"
 
 process.chdir(path)
 gulpfile = require "./gulpfile"
+
+# gulp.on 'task_start', (e) ->
+# 	gutil.log "start #{e.task}"
+
+gulp.on 'task_stop', (e) ->
+	gutil.log "#{e.task} #{gutil.colors.grey("in")} #{prettyTime(e.hrDuration)}"
+
 
 gulp.start(task)
