@@ -1,36 +1,51 @@
 #!/usr/bin/env coffee
 
-{normalize, resolve} = require "path"
+{normalize, resolve, join} = require "path"
+fs = require "fs"
 gulp = require "gulp"
 gutil = require "gulp-util"
 prettyTime = require "pretty-hrtime"
-
 program = require "commander"
+
+isValidMoonbasePath = (path) ->
+	for folder in ["pages", "templates", "assets"]
+		if not fs.existsSync(join(path, folder))
+			return false
+		if not fs.lstatSync(join(path, folder)).isDirectory()
+			return false
+	return true
 
 task = "watch"
 path = process.cwd()
+args = []
 
 program
-	.version('0.0.1')
-	.arguments('moonbase [task] [path]')
-	.action (cmdtask, cmdpath) ->
+	.version("0.0.1")
+	.arguments("moonbase [path] [task] [args...]")
+	.action (cmdtask, cmdpath, args) ->
 		task = cmdtask or task
 		path = cmdpath or path
+		args = args
+
 
 program.parse(process.argv)
 
 path = resolve(normalize(path))
 
-console.log "Running #{task} for #{path}"
+gutil.log "Running #{task} for #{path}"
+
+if not isValidMoonbasePath(path)
+	gutil.log gutil.colors.red("Error: this is not a moonbase project path:")
+	gutil.log gutil.colors.red(path)
+	process.exit(1)
 
 process.chdir(path)
 gulpfile = require "./gulpfile"
 
-# gulp.on 'task_start', (e) ->
-# 	gutil.log "start #{e.task}"
-
-gulp.on 'task_stop', (e) ->
+gulp.on "task_stop", (e) ->
 	gutil.log "#{e.task} #{gutil.colors.grey("in")} #{prettyTime(e.hrDuration)}"
 
+
+if task is "build"
 
 gulp.start(task)

@@ -1,6 +1,6 @@
 _ = require "lodash"
 {join} = require "path"
-fs = require "fs"
+fs = require "fs-extra"
 
 gulp = require "gulp"
 gutil = require "gulp-util"
@@ -29,11 +29,10 @@ markdown = require "nunjucks-markdown"
 marked = require "marked"
 Highlights = require "highlights"
 
-
 # Path configurations
 
-# We are assuming we're in node_modules for now
 workingPath = process.cwd()
+# workingSession = Math.floor(Date.now() / 1000)
 
 paths =
 	build: 			".build"
@@ -52,6 +51,12 @@ isDirectory = (path) -> fs.lstatSync(path).isDirectory()
 filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) -> 
 	_.endsWith(fileName, ext)
 
+# Exit cleanup
+
+# process.on "SIGINT", ->
+# 	fs.removeSync(buildPath())
+# 	process.exit()
+
 # Configuration
 
 try
@@ -64,8 +69,6 @@ _.defaults config,
 	settings:
 		minifyCSS: false
 		minifyJS: true
-
-console.log config
 
 # Template engine
 

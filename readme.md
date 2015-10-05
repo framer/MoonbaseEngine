@@ -10,21 +10,28 @@ This is a reimplementation of Cactus' ideas with [Gulp](http://gulpjs.com). No f
 - Code highlighting in Markdown, based on [Highlights](https://github.com/atom/highlights)
 - Support for SCSS and includes, including minification sourcemaps.
 - Support for Java/Coffee Script (with minification and sourcemaps), based on [Webpack](https://webpack.github.io)
+- Support for image sprites [TODO]
+- Support for image optimizations [TODO]
 
 #### Usage
 
 - Make sure you have Node.js installed (easiest way is through [Homebrew](http://brew.sh)).
 - Install moonbase in your project with `npm install --save moonbase`.
-- Add the example `extras/Makefile` from extras to your project.
 - Run `make` to start an auto refreshing web server.
 - Change some content in the `site` folder (see layout below).
 - Run `make build` to generate a site for uploading.
+
+
+
+moonbase
+moonbase <task>
+moonbase <path> <task> # If the working dir is not a valid project path
+
 
 #### Project layout
 
 ```
 config.coffee		Configuration variables like global context for templates.
-gulpfile.coffee		All the logic for the different tasks like build and watch.
 Makefile			Shorthands for commands to quickly build or install.
 site				Main content for the generated site.
 	static			Just static files like images, fonts and downloads.

@@ -1,4 +1,4 @@
-exports.moonbase =
+exports.config =
 	
 	settings:
 		minifyCSS: false
