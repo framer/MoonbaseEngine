@@ -1,11 +1,8 @@
 exports.config =
-	
-	settings:
-		minifyCSS: false
-		minifyJS: true
-
-	before: -> console.log "before"
-	after: -> console.log "after"
-	page: (page) ->
+	before: -> # Before every build 
+	after: -> # After every build
+	page: (path, file) ->
 		domain: "domain.com"
-		posts: []
+		path: path
+
+

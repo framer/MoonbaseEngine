@@ -19,6 +19,7 @@ minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
 emptytask = require "gulp-empty"
 {stream} = require "css-sprite"
+data = require "gulp-data"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -51,24 +52,13 @@ isDirectory = (path) -> fs.lstatSync(path).isDirectory()
 filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) -> 
 	_.endsWith(fileName, ext)
 
-# Exit cleanup
-
-# process.on "SIGINT", ->
-# 	fs.removeSync(buildPath())
-# 	process.exit()
-
 # Configuration
 
 try
-	config = require(join(process.cwd(), "moonbase"))
+	config = require(join(process.cwd(), "config"))
 	config = config[_.first(_.keys(config))]
 catch e
 	config = {}
-
-_.defaults config,
-	settings:
-		minifyCSS: false
-		minifyJS: true
 
 # Template engine
 
@@ -122,9 +112,10 @@ gulp.task "static", ->
 		.pipe(livereload())
 
 gulp.task "pages", ->
-	# config.before?()
+	config.before?()
 	gulp.src(projectPath(paths.pages, "**/*"))
 		.pipe(plumber())
+		.pipe(data((file) -> config.page(file.path.replace(projectPath(paths.pages), ""), file)))
 		.pipe(nunjucks())
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
