@@ -46,6 +46,4 @@ gulp.on "task_stop", (e) ->
 	gutil.log "#{e.task} #{gutil.colors.grey("in")} #{prettyTime(e.hrDuration)}"
 
 
-if task is "build"
-
 gulp.start(task)
