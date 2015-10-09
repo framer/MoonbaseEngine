@@ -32,6 +32,8 @@ program.parse(process.argv)
 
 path = resolve(normalize(path))
 
+console.log fs.readFileSync("./banner.txt", "utf8")
+
 gutil.log "Running #{task} for #{path}"
 
 if not isValidMoonbasePath(path)

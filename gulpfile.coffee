@@ -10,6 +10,7 @@ gulpnunjucks = require "gulp-nunjucks-html"
 livereload = require "gulp-livereload"
 sass = require "gulp-sass"
 changed = require "gulp-changed"
+newer = require "gulp-newer"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
@@ -18,7 +19,7 @@ gulpif = require "gulp-if"
 minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
 emptytask = require "gulp-empty"
-{stream} = require "css-sprite"
+sprite = require("css-sprite").stream
 data = require "gulp-data"
 
 lr = require "connect-livereload"
@@ -107,7 +108,7 @@ webpackConfigCoffeeScript.plugins = webpackConfigPlugins
 gulp.task "static", ->
 
 	gulp.src(projectPath(paths.static, "**/*.*"))
-		.pipe(changed(buildPath(paths.static, "**/*.*")))
+		.pipe(changed(buildPath(paths.static)))
 		.pipe(gulp.dest(buildPath(paths.static)))
 		.pipe(livereload())
 
@@ -120,7 +121,7 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
-gulp.task "scss", ->
+gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		#.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
@@ -159,8 +160,14 @@ gulp.task "sprites", ->
 	return emptytask unless sprites.length > 0
 
 	merge sprites.map (fileName) ->
+
+		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
+		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
+
+		console.log spriteOutputPath
+
 		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
-			.pipe(changed(buildPath(paths.sprites, "#{fileName}/*.png")))
+			.pipe(newer(spriteOutputPath))
 			.pipe(sprite(
 				name: fileName,
 				style: "#{fileName}.scss",
