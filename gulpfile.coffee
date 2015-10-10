@@ -5,12 +5,10 @@ fs = require "fs-extra"
 gulp = require "gulp"
 gutil = require "gulp-util"
 
-memoizee = require "memoizee"
 gulpnunjucks = require "gulp-nunjucks-html"
 livereload = require "gulp-livereload"
 sass = require "gulp-sass"
 changed = require "gulp-changed"
-newer = require "gulp-newer"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
@@ -19,8 +17,10 @@ gulpif = require "gulp-if"
 minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
 emptytask = require "gulp-empty"
-sprite = require("css-sprite").stream
 data = require "gulp-data"
+newy = require "./vendor/newy"
+del = require "del"
+spritesmith = require "gulp.spritesmith"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -106,7 +106,6 @@ webpackConfigCoffeeScript.plugins = webpackConfigPlugins
 # Gulp Tasks
 
 gulp.task "static", ->
-
 	gulp.src(projectPath(paths.static, "**/*.*"))
 		.pipe(changed(buildPath(paths.static)))
 		.pipe(gulp.dest(buildPath(paths.static)))
@@ -164,20 +163,25 @@ gulp.task "sprites", ->
 		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
 		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
 
-		console.log spriteOutputPath
-
-		gulp.src(projectPath(paths.sprites, "#{fileName}/*.png"))
-			.pipe(newer(spriteOutputPath))
-			.pipe(sprite(
-				name: fileName,
-				style: "#{fileName}.scss",
-				cssPath: "/assets/sprites/",
-				processor: "scss"
+		spriteData = gulp.src(spriteImagesPath)
+			.pipe(newy((projectDir, srcFile, absSrcFile) ->
+				return projectPath(join("assets", "sprites", "#{fileName}.scss"))
 			))
-			.pipe(gulpif("*.png", 
-				gulp.dest(buildPath(paths.sprites)), 
-				gulp.dest(projectPath(paths.sprites))))
-			.pipe(livereload())
+			.pipe(spritesmith({
+				imgName: "#{fileName}.png",
+				cssName: "#{fileName}.scss"
+			}
+		))
+
+		imgStream = spriteData.img
+			# .pipe(imagemin())
+			.pipe(gulp.dest(buildPath(paths.sprites)));
+
+		cssStream = spriteData.css
+			# .pipe(csso())
+			.pipe(gulp.dest(projectPath(paths.sprites)));
+
+		return merge(imgStream, cssStream).pipe(livereload())
 
 gulp.task "watch", ["build"], (cb) ->
 
@@ -218,6 +222,9 @@ gulp.task "server", (cb) ->
 			gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
 
 			cb(err)
+
+gulp.task "clean", ->
+	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
 
 gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
 gulp.task("default", ["server"])
