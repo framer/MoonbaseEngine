@@ -32,7 +32,7 @@ program.parse(process.argv)
 
 path = resolve(normalize(path))
 
-console.log fs.readFileSync("./banner.txt", "utf8")
+console.log fs.readFileSync("./banner", "utf8")
 
 gutil.log "Running #{task} for #{path}"
 
