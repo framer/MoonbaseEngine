@@ -2,6 +2,7 @@
 
 {normalize, resolve, join} = require "path"
 fs = require "fs"
+{join} = require "path"
 gulp = require "gulp"
 gutil = require "gulp-util"
 prettyTime = require "pretty-hrtime"
@@ -32,7 +33,7 @@ program.parse(process.argv)
 
 path = resolve(normalize(path))
 
-console.log fs.readFileSync("./banner", "utf8")
+console.log fs.readFileSync(join(__dirname, "banner.txt"), "utf8")
 
 gutil.log "Running #{task} for #{path}"
 
