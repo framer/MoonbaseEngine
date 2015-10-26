@@ -50,7 +50,7 @@ projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
 
 isDirectory = (path) -> fs.lstatSync(path).isDirectory()
-filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) -> 
+filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) ->
 	_.endsWith(fileName, ext)
 
 # Configuration
@@ -80,7 +80,7 @@ nunjucks = ->
 
 # Webpack
 
-webpackConfig = 
+webpackConfig =
 	module:
 		loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
 	resolve: extensions: ["", ".coffee", ".js"]
@@ -151,6 +151,8 @@ gulp.task "javascript", ->
 
 gulp.task "sprites", ->
 
+	del(projectPath(paths.sprites, "*.scss"))
+
 	return emptytask unless isDirectory(projectPath(paths.sprites))
 
 	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
@@ -192,15 +194,15 @@ gulp.task "watch", ["build"], (cb) ->
 		projectPath(paths.templates, "**/*.md")
 	], (err, events) -> gulp.start("pages")
 
-	watch [projectPath(paths.static, "**/*.*")], (err, events) -> 
+	watch [projectPath(paths.static, "**/*.*")], (err, events) ->
 		gulp.start("static")
-	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> 
+	watch [projectPath(paths.scss, "**/*.scss")], (err, events) ->
 		gulp.start("scss")
-	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> 
+	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) ->
 		gulp.start("coffeescript")
-	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> 
+	watch [projectPath(paths.javascript, "**/*.js")], (err, events) ->
 		gulp.start("javascript")
-	watch [projectPath(paths.sprites, "*/*.png")], (err, events) -> 
+	watch [projectPath(paths.sprites, "*/*.png")], (err, events) ->
 		gulp.start("scss")
 
 	gulp.start("server", cb)
