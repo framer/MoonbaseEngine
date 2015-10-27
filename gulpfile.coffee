@@ -1,5 +1,5 @@
 _ = require "lodash"
-{join, basename} = require "path"
+{join, basename, extname} = require "path"
 fs = require "fs-extra"
 glob = require "glob"
 
@@ -108,7 +108,7 @@ webpackEntries = (path) ->
 	entry = {}
 
 	for p in glob.sync(path)
-		entry[basename(p)] = p
+		entry[basename(p, extname(p))] = p
 
 	return entry
 
