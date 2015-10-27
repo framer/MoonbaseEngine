@@ -168,35 +168,27 @@ gulp.task "sprites", ->
 
 	return emptytask unless isDirectory(projectPath(paths.sprites))
 
-	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
-		isDirectory(join(projectPath(paths.sprites), fileName))
+	spriteImagesPath = projectPath(paths.sprites, "export/*.png")
+	spriteData = gulp.src(spriteImagesPath)
+		.pipe(spritesmith({
+			cssName: "sprite.scss"
+			imgName: "sprite.png"
+			retinaImgName: "sprite@2x.png"
+			imgPath: "../sprites/sprite.png"
+			retinaImgPath: "../sprites/sprite@2x.png"
+			retinaSrcFilter: [projectPath(paths.sprites, "export/*@2x.png")]
+		}
+	))
 
-	return emptytask unless sprites.length > 0
+	imgStream = spriteData.img
+		# .pipe(imagemin())
+		.pipe(gulp.dest(buildPath(paths.sprites)));
 
-	merge sprites.map (fileName) ->
+	cssStream = spriteData.css
+		# .pipe(csso())
+		.pipe(gulp.dest(projectPath(paths.sprites)));
 
-		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
-		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
-
-		spriteData = gulp.src(spriteImagesPath)
-			.pipe(newy((projectDir, srcFile, absSrcFile) ->
-				return projectPath(join("assets", "sprites", "#{fileName}.scss"))
-			))
-			.pipe(spritesmith({
-				imgName: "#{fileName}.png",
-				cssName: "#{fileName}.scss"
-			}
-		))
-
-		imgStream = spriteData.img
-			# .pipe(imagemin())
-			.pipe(gulp.dest(buildPath(paths.sprites)));
-
-		cssStream = spriteData.css
-			# .pipe(csso())
-			.pipe(gulp.dest(projectPath(paths.sprites)));
-
-		return merge(imgStream, cssStream).pipe(livereload())
+	return merge(imgStream, cssStream).pipe(livereload())
 
 gulp.task "watch", ["build"], (cb) ->
 
