@@ -1,6 +1,7 @@
 _ = require "lodash"
-{join} = require "path"
+{join, basename, extname} = require "path"
 fs = require "fs-extra"
+glob = require "glob"
 
 gulp = require "gulp"
 gutil = require "gulp-util"
@@ -103,6 +104,14 @@ webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
 webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
 webpackConfigCoffeeScript.plugins = webpackConfigPlugins
 
+webpackEntries = (path) ->
+	entry = {}
+
+	for p in glob.sync(path)
+		entry[basename(p, extname(p))] = p
+
+	return entry
+
 # Gulp Tasks
 
 gulp.task "static", ->
@@ -134,6 +143,9 @@ gulp.task "coffeescript", ->
 	return emptytask unless filesInDir(
 		projectPath(paths.coffeescript), ".coffee").length
 
+	webpackConfigCoffeeScript.entry = webpackEntries(
+		projectPath(paths.coffeescript, "*.coffee"))
+
 	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
 		.pipe(webpack(webpackConfigCoffeeScript))
 		.pipe(gulp.dest(buildPath(paths.coffeescript)))
@@ -144,14 +156,15 @@ gulp.task "javascript", ->
 	return emptytask unless filesInDir(
 		projectPath(paths.javascript), ".js").length
 
+	webpackConfigJavaScript.entry = webpackEntries(
+		projectPath(paths.javascript, "*.js"))
+
 	gulp.src(projectPath(paths.javascript, "*.js"))
 		.pipe(webpack(webpackConfigJavaScript))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
 		.pipe(livereload())
 
 gulp.task "sprites", ->
-
-	del(projectPath(paths.sprites, "*.scss"))
 
 	return emptytask unless isDirectory(projectPath(paths.sprites))
 
