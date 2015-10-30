@@ -59,7 +59,7 @@ filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) ->
 # Exports
 
 exports.nunjucks =
-	render: -> console.log "Environment not initialized"
+	env: null
 
 
 # Configuration
@@ -89,7 +89,7 @@ nunjucks = ->
 			env.addFilter "date", (date, format) ->
 				return moment(date).format(format)
  			
-			exports.nunjucks.render = env.renderString
+			exports.nunjucks.env = env
 
 			return env
 
