@@ -30,7 +30,9 @@ express = require "express"
 
 markdown = require "nunjucks-markdown"
 marked = require "marked"
+moment = require "moment"
 Highlights = require "highlights"
+
 
 # Path configurations
 
@@ -77,6 +79,10 @@ nunjucks = ->
 		searchPaths: projectPath(paths.templates)
 		setUp: (env) ->
 			markdown.register(env, marked)
+
+			env.addFilter "date", (date, format) ->
+				return moment(date).format(format)
+ 				
 			return env
 
 # Webpack
