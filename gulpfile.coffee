@@ -56,6 +56,12 @@ isDirectory = (path) -> fs.lstatSync(path).isDirectory()
 filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) ->
 	_.endsWith(fileName, ext)
 
+# Exports
+
+exports.nunjucks =
+	render: -> console.log "Environment not initialized"
+
+
 # Configuration
 
 try
@@ -82,7 +88,9 @@ nunjucks = ->
 
 			env.addFilter "date", (date, format) ->
 				return moment(date).format(format)
- 				
+ 			
+			exports.nunjucks.render = env.renderString
+
 			return env
 
 # Webpack
