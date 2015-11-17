@@ -1,7 +1,7 @@
 {
   "name": "moonbase",
-  "version": "1.1.9",
-  "description": "Cactus through Gulp",
+  "version": "1.1.10",
+  "description": "Opinionated static site generator.",
   "main": "moonbase.coffee",
   "directories": {
     "doc": "docs"
