@@ -10,6 +10,7 @@ gulpnunjucks = require "gulp-nunjucks-html"
 livereload = require "gulp-livereload"
 sass = require "gulp-sass"
 changed = require "gulp-changed"
+newer = require "gulp-newer"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
@@ -187,6 +188,7 @@ gulp.task "sprites", ->
 
 	spriteImagesPath = projectPath(paths.sprites, "export/*.png")
 	spriteData = gulp.src(spriteImagesPath)
+		.pipe(newer(buildPath(paths.sprites, "sprite.png")))
 		.pipe(spritesmith({
 			cssName: "sprite.scss"
 			imgName: "sprite.png"
