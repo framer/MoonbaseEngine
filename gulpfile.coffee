@@ -231,6 +231,7 @@ gulp.task "watch", ["build"], (cb) ->
 
 gulp.task "server", (cb) ->
 
+	portfinder.basePort = 9000
 	portfinder.getPort (err, serverPort)  ->
 		portfinder.basePort = 10000
 		portfinder.getPort (err, livereloadPort)  ->
