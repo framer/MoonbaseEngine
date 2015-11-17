@@ -52,9 +52,12 @@ paths =
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
 
-isDirectory = (path) -> fs.lstatSync(path).isDirectory()
-filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) ->
-	_.endsWith(fileName, ext)
+isDirectory = (path) ->
+	return false unless fs.existsSync(path)
+	return fs.lstatSync(path).isDirectory()
+filesInDir = (path, ext) -> 
+	return [] unless fs.existsSync(path)
+	return fs.readdirSync(path).filter (fileName) -> _.endsWith(fileName, ext)
 
 # Exports
 
