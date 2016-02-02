@@ -16,7 +16,7 @@ webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
 merge = require "merge-stream"
 gulpif = require "gulp-if"
-minifycss = require "gulp-minify-css"
+# minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
 emptytask = require "gulp-empty"
 data = require "gulp-data"
@@ -56,7 +56,7 @@ buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fil
 isDirectory = (path) ->
 	return false unless fs.existsSync(path)
 	return fs.lstatSync(path).isDirectory()
-filesInDir = (path, ext) -> 
+filesInDir = (path, ext) ->
 	return [] unless fs.existsSync(path)
 	return fs.readdirSync(path).filter (fileName) -> _.endsWith(fileName, ext)
 
@@ -92,7 +92,7 @@ nunjucks = ->
 
 			env.addFilter "date", (date, format) ->
 				return moment(date).format(format)
- 			
+
 			exports.nunjucks.env = env
 
 			return env
