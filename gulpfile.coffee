@@ -112,7 +112,7 @@ webpackConfig =
 
 webpackConfigPlugins = [
 	new webpack.webpack.optimize.DedupePlugin(),
-	new webpack.webpack.optimize.UglifyJsPlugin()
+	new webpack.webpack.optimize.UglifyJsPlugin(compress: warnings: false)
 ]
 
 webpackConfigJavaScript = _.cloneDeep(webpackConfig)
