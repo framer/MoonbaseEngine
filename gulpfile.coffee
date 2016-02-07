@@ -150,7 +150,7 @@ gulp.task "pages", ->
 gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		#.pipe(sourcemaps.init())
-		.pipe(sass().on("error", sass.logError))
+		.pipe(sass(importer: moduleImporter()).on("error", sass.logError))
 		#.pipe(minifycss(rebase: false))
 		#.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
