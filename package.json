@@ -1,6 +1,6 @@
 {
   "name": "moonbase",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "description": "Opinionated static site generator.",
   "main": "moonbase.coffee",
   "directories": {
