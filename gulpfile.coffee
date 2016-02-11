@@ -33,6 +33,7 @@ markdown = require "nunjucks-markdown"
 marked = require "marked"
 moment = require "moment"
 Highlights = require "highlights"
+moduleImporter = require "sass-module-importer"
 
 
 # Path configurations
