@@ -184,30 +184,44 @@ gulp.task "javascript", ->
 
 gulp.task "sprites", ->
 
+	# Build a sprite package from every folder in assets/sprites
+
+	# Return if there is no sprite assets folder at all
 	return emptytask unless isDirectory(projectPath(paths.sprites))
 
-	spriteImagesPath = projectPath(paths.sprites, "export/*.png")
-	spriteData = gulp.src(spriteImagesPath)
-		.pipe(newer(buildPath(paths.sprites, "sprite.png")))
-		.pipe(spritesmith({
-			cssName: "sprite.scss"
-			imgName: "sprite.png"
-			retinaImgName: "sprite@2x.png"
-			imgPath: "../sprites/sprite.png"
-			retinaImgPath: "../sprites/sprite@2x.png"
-			retinaSrcFilter: [projectPath(paths.sprites, "export/*@2x.png")]
-		}
-	))
+	# Look for sprite package folders in the sprite assets folder
+	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
+		isDirectory(join(projectPath(paths.sprites), fileName))
 
-	imgStream = spriteData.img
-		# .pipe(imagemin())
-		.pipe(gulp.dest(buildPath(paths.sprites)));
+	return emptytask unless sprites.length > 0
 
-	cssStream = spriteData.css
-		# .pipe(csso())
-		.pipe(gulp.dest(projectPath(paths.sprites)));
+	# Build a sprite package from every folder and output scss and images
+	return merge sprites.map (fileName) ->
 
-	return merge(imgStream, cssStream).pipe(livereload())
+		gutil.log("Building sprites for \"#{fileName}\"")
+
+		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
+		spriteData = gulp.src(spriteImagesPath)
+			.pipe(newer(buildPath(paths.sprites, "sprite.png")))
+			.pipe(spritesmith({
+				cssName: "#{fileName}.scss"
+				imgName: "#{fileName}.png"
+				retinaImgName: "#{fileName}@2x.png"
+				imgPath: "../sprites/#{fileName}.png"
+				retinaImgPath: "../sprites/#{fileName}@2x.png"
+				retinaSrcFilter: [projectPath(paths.sprites, "#{fileName}/*@2x.png")]
+			}
+		))
+
+		imgStream = spriteData.img
+			# .pipe(imagemin())
+			.pipe(gulp.dest(buildPath(paths.sprites)));
+
+		cssStream = spriteData.css
+			# .pipe(csso())
+			.pipe(gulp.dest(projectPath(paths.sprites)));
+
+		return merge(imgStream, cssStream).pipe(livereload())
 
 gulp.task "watch", ["build"], (cb) ->
 
