@@ -203,11 +203,12 @@ gulp.task "sprites", ->
 
 		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
 		spriteData = gulp.src(spriteImagesPath)
-			.pipe(newer(buildPath(paths.sprites, "sprite.png")))
+			.pipe(newer(buildPath(paths.sprites, "#{fileName}/*.png")))
 			.pipe(spritesmith({
 				cssName: "#{fileName}.scss"
 				imgName: "#{fileName}.png"
 				retinaImgName: "#{fileName}@2x.png"
+				# These paths need to be relative to the server
 				imgPath: "../sprites/#{fileName}.png"
 				retinaImgPath: "../sprites/#{fileName}@2x.png"
 				retinaSrcFilter: [projectPath(paths.sprites, "#{fileName}/*@2x.png")]
