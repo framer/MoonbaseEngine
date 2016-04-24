@@ -1,6 +1,7 @@
 _ = require "lodash"
 {join} = require "path"
 fs = require "fs-extra"
+{execSync} = require "child_process"
 
 gulp = require "gulp"
 gutil = require "gulp-util"
@@ -22,6 +23,7 @@ newy = require "./vendor/newy"
 del = require "del"
 spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
+md5 = require "gulp-md5-assets"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -112,6 +114,12 @@ imageminOptions =
 	quality: process.env.MOONBASE_IMAGEMIN_QUALITY or "65-80"
 	speed: process.env.MOONBASE_IMAGEMIN_SPEED or 4
 
+# Utilities
+
+getTotalSizeForFileType = (path, ext) ->
+	return execSync("find #{path} -type f -name '*.#{ext}' -exec du -ch {} + | grep total")
+		.toString().replace(/^\s+|\s+$/g, "").split(/\s/)[0]
+
 # Gulp Tasks
 
 gulp.task "static", ->
@@ -197,6 +205,11 @@ gulp.task "imagemin", ->
 		.pipe(imagemin(imageminOptions)())
 		.pipe(gulp.dest(projectPath(paths.static)))
 
+gulp.task "md5", ["build"], ->
+	return gulp.src(buildPath("", "**/*.{css, js}"))
+		.pipe(md5(10, buildPath("", "**/*.html")))
+		.pipe(gulp.dest(buildPath("")))
+
 gulp.task "watch", ["build"], (cb) ->
 
 	watch [
@@ -236,6 +249,10 @@ gulp.task "server", (cb) ->
 			gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
 
 			cb(err)
+
+gulp.task "report", ->
+	for ext in ["html", "css", "jpg", "png", "mp4", "ico"]
+		gutil.log(gutil.colors.green("#{ext} #{getTotalSizeForFileType(buildPath(paths.assets), ext)}"))
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
