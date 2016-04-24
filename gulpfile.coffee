@@ -1,7 +1,6 @@
 _ = require "lodash"
-{join, basename, extname} = require "path"
+{join} = require "path"
 fs = require "fs-extra"
-glob = require "glob"
 
 gulp = require "gulp"
 gutil = require "gulp-util"
@@ -10,13 +9,12 @@ gulpnunjucks = require "gulp-nunjucks-html"
 livereload = require "gulp-livereload"
 sass = require "gulp-sass"
 changed = require "gulp-changed"
-newer = require "gulp-newer"
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
 merge = require "merge-stream"
 gulpif = require "gulp-if"
-# minifycss = require "gulp-minify-css"
+minifycss = require "gulp-minify-css"
 sourcemaps = require "gulp-sourcemaps"
 emptytask = require "gulp-empty"
 data = require "gulp-data"
@@ -31,9 +29,8 @@ express = require "express"
 
 markdown = require "nunjucks-markdown"
 marked = require "marked"
-moment = require "moment"
 Highlights = require "highlights"
-moduleImporter = require "sass-module-importer"
+imagemin = require "imagemin-pngquant"
 
 
 # Path configurations
@@ -54,18 +51,9 @@ paths =
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
 
-isDirectory = (path) ->
-	return false unless fs.existsSync(path)
-	return fs.lstatSync(path).isDirectory()
-filesInDir = (path, ext) ->
-	return [] unless fs.existsSync(path)
-	return fs.readdirSync(path).filter (fileName) -> _.endsWith(fileName, ext)
-
-# Exports
-
-exports.nunjucks =
-	env: null
-
+isDirectory = (path) -> fs.lstatSync(path).isDirectory()
+filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) -> 
+	_.endsWith(fileName, ext)
 
 # Configuration
 
@@ -90,17 +78,11 @@ nunjucks = ->
 		searchPaths: projectPath(paths.templates)
 		setUp: (env) ->
 			markdown.register(env, marked)
-
-			env.addFilter "date", (date, format) ->
-				return moment(date).format(format)
-
-			exports.nunjucks.env = env
-
 			return env
 
 # Webpack
 
-webpackConfig =
+webpackConfig = 
 	module:
 		loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
 	resolve: extensions: ["", ".coffee", ".js"]
@@ -113,7 +95,7 @@ webpackConfig =
 
 webpackConfigPlugins = [
 	new webpack.webpack.optimize.DedupePlugin(),
-	new webpack.webpack.optimize.UglifyJsPlugin(compress: warnings: false)
+	new webpack.webpack.optimize.UglifyJsPlugin()
 ]
 
 webpackConfigJavaScript = _.cloneDeep(webpackConfig)
@@ -122,14 +104,6 @@ webpackConfigJavaScript.plugins = webpackConfigPlugins
 webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
 webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
 webpackConfigCoffeeScript.plugins = webpackConfigPlugins
-
-webpackEntries = (path) ->
-	entry = {}
-
-	for p in glob.sync(path)
-		entry[basename(p, extname(p))] = p
-
-	return entry
 
 # Gulp Tasks
 
@@ -151,7 +125,7 @@ gulp.task "pages", ->
 gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		#.pipe(sourcemaps.init())
-		.pipe(sass(importer: moduleImporter()).on("error", sass.logError))
+		.pipe(sass().on("error", sass.logError))
 		#.pipe(minifycss(rebase: false))
 		#.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
@@ -161,9 +135,6 @@ gulp.task "coffeescript", ->
 
 	return emptytask unless filesInDir(
 		projectPath(paths.coffeescript), ".coffee").length
-
-	webpackConfigCoffeeScript.entry = webpackEntries(
-		projectPath(paths.coffeescript, "*.coffee"))
 
 	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
 		.pipe(webpack(webpackConfigCoffeeScript))
@@ -175,9 +146,6 @@ gulp.task "javascript", ->
 	return emptytask unless filesInDir(
 		projectPath(paths.javascript), ".js").length
 
-	webpackConfigJavaScript.entry = webpackEntries(
-		projectPath(paths.javascript, "*.js"))
-
 	gulp.src(projectPath(paths.javascript, "*.js"))
 		.pipe(webpack(webpackConfigJavaScript))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
@@ -185,33 +153,25 @@ gulp.task "javascript", ->
 
 gulp.task "sprites", ->
 
-	# Build a sprite package from every folder in assets/sprites
-
-	# Return if there is no sprite assets folder at all
 	return emptytask unless isDirectory(projectPath(paths.sprites))
 
-	# Look for sprite package folders in the sprite assets folder
 	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
 		isDirectory(join(projectPath(paths.sprites), fileName))
 
 	return emptytask unless sprites.length > 0
 
-	# Build a sprite package from every folder and output scss and images
-	return merge sprites.map (fileName) ->
-
-		gutil.log("Building sprites for \"#{fileName}\"")
+	merge sprites.map (fileName) ->
 
 		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
+		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
+
 		spriteData = gulp.src(spriteImagesPath)
-			.pipe(newer(buildPath(paths.sprites, "#{fileName}/*.png")))
+			.pipe(newy((projectDir, srcFile, absSrcFile) ->
+				return projectPath(join("assets", "sprites", "#{fileName}.scss"))
+			))
 			.pipe(spritesmith({
+				imgName: "#{fileName}.png",
 				cssName: "#{fileName}.scss"
-				imgName: "#{fileName}.png"
-				retinaImgName: "#{fileName}@2x.png"
-				# These paths need to be relative to the server
-				imgPath: "../sprites/#{fileName}.png"
-				retinaImgPath: "../sprites/#{fileName}@2x.png"
-				retinaSrcFilter: [projectPath(paths.sprites, "#{fileName}/*@2x.png")]
 			}
 		))
 
@@ -225,6 +185,11 @@ gulp.task "sprites", ->
 
 		return merge(imgStream, cssStream).pipe(livereload())
 
+gulp.task "imagemin", ->
+	return gulp.src(projectPath(paths.static, "**/*.png"))
+		.pipe(imagemin({quality: "65-80", speed: 4})())
+		.pipe(projectPath(paths.static))
+
 gulp.task "watch", ["build"], (cb) ->
 
 	watch [
@@ -234,22 +199,21 @@ gulp.task "watch", ["build"], (cb) ->
 		projectPath(paths.templates, "**/*.md")
 	], (err, events) -> gulp.start("pages")
 
-	watch [projectPath(paths.static, "**/*.*")], (err, events) ->
+	watch [projectPath(paths.static, "**/*.*")], (err, events) -> 
 		gulp.start("static")
-	watch [projectPath(paths.scss, "**/*.scss")], (err, events) ->
+	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> 
 		gulp.start("scss")
-	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) ->
+	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> 
 		gulp.start("coffeescript")
-	watch [projectPath(paths.javascript, "**/*.js")], (err, events) ->
+	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> 
 		gulp.start("javascript")
-	watch [projectPath(paths.sprites, "*/*.png")], (err, events) ->
+	watch [projectPath(paths.sprites, "*/*.png")], (err, events) -> 
 		gulp.start("scss")
 
 	gulp.start("server", cb)
 
 gulp.task "server", (cb) ->
 
-	portfinder.basePort = 9000
 	portfinder.getPort (err, serverPort)  ->
 		portfinder.basePort = 10000
 		portfinder.getPort (err, livereloadPort)  ->
