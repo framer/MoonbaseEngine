@@ -49,7 +49,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "moonbase": "moonbase.coffee"
+    "moonbase": "run.coffee"
   },
   "repository": {
     "type": "git",
