@@ -21,6 +21,7 @@ data = require "gulp-data"
 newy = require "./vendor/newy"
 del = require "del"
 spritesmith = require "gulp.spritesmith"
+imagemin = require "imagemin-pngquant"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -105,6 +106,12 @@ webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
 webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
 webpackConfigCoffeeScript.plugins = webpackConfigPlugins
 
+# Imagemin
+
+imageminOptions =
+	quality: process.env.MOONBASE_IMAGEMIN_QUALITY or "65-80"
+	speed: process.env.MOONBASE_IMAGEMIN_SPEED or 4
+
 # Gulp Tasks
 
 gulp.task "static", ->
@@ -176,7 +183,7 @@ gulp.task "sprites", ->
 		))
 
 		imgStream = spriteData.img
-			# .pipe(imagemin())
+			.pipe(imagemin(imageminOptions)())
 			.pipe(gulp.dest(buildPath(paths.sprites)));
 
 		cssStream = spriteData.css
@@ -187,8 +194,8 @@ gulp.task "sprites", ->
 
 gulp.task "imagemin", ->
 	return gulp.src(projectPath(paths.static, "**/*.png"))
-		.pipe(imagemin({quality: "65-80", speed: 4})())
-		.pipe(projectPath(paths.static))
+		.pipe(imagemin(imageminOptions)())
+		.pipe(gulp.dest(projectPath(paths.static)))
 
 gulp.task "watch", ["build"], (cb) ->
 
