@@ -28,20 +28,20 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.6",
     "gulp-watch": "^4.3.5",
-    "gulp.spritesmith": "^4.1.1",
+    "gulp.spritesmith": "^6.2.1",
     "highlights": "^1.2.0",
     "imagemin-pngquant": "^4.2.2",
-    "lodash": "^3.10.1",
+    "lodash": "^4.11.1",
     "marked": "^0.3.5",
     "memoizee": "^0.3.9",
     "merge-stream": "^1.0.0",
-    "nunjucks-markdown": "^1.1.0",
-    "portfinder": "^0.4.0",
+    "nunjucks-markdown": "^2.0.0",
+    "portfinder": "^1.0.3",
     "pretty-hrtime": "^1.0.0",
-    "st": "^0.5.5",
+    "st": "^1.1.0",
     "through2": "^2.0.0",
     "vinyl-named": "^1.1.0",
-    "webpack-stream": "^2.1.0"
+    "webpack-stream": "^3.2.0"
   },
   "devDependencies": {
     "coffee-script": "^1.10.0"
