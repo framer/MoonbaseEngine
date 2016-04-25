@@ -34,6 +34,7 @@ markdown = require "nunjucks-markdown"
 marked = require "marked"
 Highlights = require "highlights"
 imagemin = require "imagemin-pngquant"
+named = require "vinyl-named"
 
 
 # Path configurations
@@ -152,6 +153,7 @@ gulp.task "coffeescript", ->
 		projectPath(paths.coffeescript), ".coffee").length
 
 	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
+		.pipe(named())
 		.pipe(webpack(webpackConfigCoffeeScript))
 		.pipe(gulp.dest(buildPath(paths.coffeescript)))
 		.pipe(livereload())
@@ -162,6 +164,7 @@ gulp.task "javascript", ->
 		projectPath(paths.javascript), ".js").length
 
 	gulp.src(projectPath(paths.javascript, "*.js"))
+		.pipe(named())
 		.pipe(webpack(webpackConfigJavaScript))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
 		.pipe(livereload())
