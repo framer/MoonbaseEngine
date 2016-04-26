@@ -181,20 +181,25 @@ gulp.task "sprites", ->
 	merge sprites.map (fileName) ->
 
 		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
+		spriteImagesPath2x = projectPath(paths.sprites, "#{fileName}/*@2x.png")
 		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
 
 		spriteData = gulp.src(spriteImagesPath)
-			.pipe(newy((projectDir, srcFile, absSrcFile) ->
-				return projectPath(join("assets", "sprites", "#{fileName}.scss"))
-			))
+			# .pipe(newy((projectDir, srcFile, absSrcFile) ->
+			# 	return projectPath(join("assets", "sprites", "#{fileName}.scss"))
+			# ))
 			.pipe(spritesmith({
+				retinaSrcFilter: [spriteImagesPath2x],
 				imgName: "#{fileName}.png",
-				cssName: "#{fileName}.scss"
+				retinaImgName: "../sprites/#{fileName}@2x.png",
+				cssName: "#{fileName}.scss",
+				imgPath: "../sprites/#{fileName}.png"
+				retinaImgPath: "../sprites/#{fileName}@2x.png"
 			}
 		))
 
 		imgStream = spriteData.img
-			# .pipe(imagemin(imageminOptions)())
+			.pipe(imagemin(imageminOptions)())
 			.pipe(gulp.dest(buildPath(paths.sprites)));
 
 		cssStream = spriteData.css
