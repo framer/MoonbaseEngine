@@ -199,7 +199,7 @@ gulp.task "sprites", ->
 		))
 
 		imgStream = spriteData.img
-			.pipe(imagemin(imageminOptions)())
+			#.pipe(imagemin(imageminOptions)())
 			.pipe(gulp.dest(buildPath(paths.sprites)));
 
 		cssStream = spriteData.css
