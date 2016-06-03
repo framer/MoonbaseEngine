@@ -80,14 +80,14 @@ marked.setOptions
 
 nunjucksDate.setDefaultFormat("MMMM Do YYYY, h:mm:ss a")
 
-nunjucks = gulpnunjucks
+nunjucks = {}
+nunjucksPipe = -> gulpnunjucks
 	searchPaths: projectPath(paths.templates)
 	setUp: (env) ->
 		markdown.register(env, marked)
 		nunjucksDate.install(env)
 		nunjucks.env = env
 		return env
-nunjucksPipe = -> nunjucks
 
 # Webpack
 
