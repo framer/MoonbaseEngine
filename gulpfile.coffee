@@ -7,6 +7,7 @@ gulp = require "gulp"
 gutil = require "gulp-util"
 
 gulpnunjucks = require "gulp-nunjucks-html"
+nunjucksDate = require "nunjucks-date"
 livereload = require "gulp-livereload"
 sass = require "gulp-sass"
 changed = require "gulp-changed"
@@ -77,11 +78,14 @@ marked.setOptions
 			fileContents: code
 			scopeName: language
 
+nunjucksDate.setDefaultFormat("MMMM Do YYYY, h:mm:ss a")
+
 nunjucks = ->
 	gulpnunjucks
 		searchPaths: projectPath(paths.templates)
 		setUp: (env) ->
 			markdown.register(env, marked)
+			nunjucksDate.install(env)
 			return env
 
 # Webpack
