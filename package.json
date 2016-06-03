@@ -1,6 +1,6 @@
 {
   "name": "moonbase",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Cactus through Gulp",
   "main": "moonbase.coffee",
   "directories": {
