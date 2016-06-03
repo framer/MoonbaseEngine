@@ -80,13 +80,14 @@ marked.setOptions
 
 nunjucksDate.setDefaultFormat("MMMM Do YYYY, h:mm:ss a")
 
-nunjucks = ->
-	gulpnunjucks
-		searchPaths: projectPath(paths.templates)
-		setUp: (env) ->
-			markdown.register(env, marked)
-			nunjucksDate.install(env)
-			return env
+nunjucks = gulpnunjucks
+	searchPaths: projectPath(paths.templates)
+	setUp: (env) ->
+		markdown.register(env, marked)
+		nunjucksDate.install(env)
+		nunjucks.env = env
+		return env
+nunjucksPipe = -> nunjucks
 
 # Webpack
 
@@ -125,6 +126,11 @@ getTotalSizeForFileType = (path, ext) ->
 	return execSync("find #{path} -type f -name '*.#{ext}' -exec du -ch {} + | grep total")
 		.toString().replace(/^\s+|\s+$/g, "").split(/\s/)[0]
 
+# Context
+
+context =
+	nunjucks: nunjucks
+
 # Gulp Tasks
 
 gulp.task "static", ->
@@ -134,16 +140,17 @@ gulp.task "static", ->
 		.pipe(livereload())
 
 gulp.task "pages", ->
-	config.before?()
+	config.before?(context)
 	gulp.src(projectPath(paths.pages, "**/*"))
 		.pipe(plumber())
-		.pipe(data((file) -> config.page(file.path.replace(projectPath(paths.pages), ""), file)))
-		.pipe(nunjucks())
+		.pipe(data((file) -> config.page?(file.path.replace(projectPath(paths.pages), ""), file, context)))
+		.pipe(nunjucksPipe())
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
 gulp.task "scss", ["sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
+		.pipe(plumber())
 		#.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
 		#.pipe(minifycss(rebase: false))
@@ -157,6 +164,7 @@ gulp.task "coffeescript", ->
 		projectPath(paths.coffeescript), ".coffee").length
 
 	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
+		.pipe(plumber())
 		.pipe(named())
 		.pipe(webpack(webpackConfigCoffeeScript))
 		.pipe(gulp.dest(buildPath(paths.coffeescript)))
@@ -168,6 +176,7 @@ gulp.task "javascript", ->
 		projectPath(paths.javascript), ".js").length
 
 	gulp.src(projectPath(paths.javascript, "*.js"))
+		.pipe(plumber())
 		.pipe(named())
 		.pipe(webpack(webpackConfigJavaScript))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
@@ -192,6 +201,7 @@ gulp.task "sprites", ->
 			# .pipe(newy((projectDir, srcFile, absSrcFile) ->
 			# 	return projectPath(join("assets", "sprites", "#{fileName}.scss"))
 			# ))
+			.pipe(plumber())
 			.pipe(spritesmith({
 				retinaSrcFilter: [spriteImagesPath2x],
 				imgName: "#{fileName}.png",
@@ -214,6 +224,7 @@ gulp.task "sprites", ->
 
 gulp.task "imagemin", ->
 	return gulp.src(projectPath(paths.static, "**/*.png"))
+		.pipe(plumber())
 		.pipe(imagemin(imageminOptions)())
 		.pipe(gulp.dest(projectPath(paths.static)))
 
@@ -271,3 +282,4 @@ gulp.task "clean", ->
 
 gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
 gulp.task("default", ["server"])
+
