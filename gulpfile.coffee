@@ -104,8 +104,9 @@ webpackConfig =
 	output:
 		filename: "[name].js"
 	cache: true
-	devtool: "sourcemap"
+	quiet: true
 	watch: false
+	devtool: "sourcemap"
 
 webpackConfigPlugins = [
 	new webpack.webpack.optimize.DedupePlugin(),
