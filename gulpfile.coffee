@@ -62,8 +62,10 @@ isDirectory = (path) ->
 	catch e
 		return false
 	
-filesInDir = (path, ext) -> fs.readdirSync(path).filter (fileName) -> 
-	_.endsWith(fileName, ext)
+filesInDir = (path, ext) -> 
+	return [] unless fs.existsSync(path)
+	fs.readdirSync(path).filter (fileName) -> 
+		_.endsWith(fileName, ext)
 
 # Configuration
 
