@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee
+#!./node_modules/.bin/coffee
 
 {normalize, resolve, join} = require "path"
 fs = require "fs"
