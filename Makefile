@@ -1,8 +1,5 @@
 TEMPDIR := $(shell mktemp -d)
 
-js:
-	./node_modules/.bin/coffee -c *.coffee
-
 publish: git-check
 	npm publish
 
