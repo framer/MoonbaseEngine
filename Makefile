@@ -1,0 +1,23 @@
+js:
+	./node_modules/.bin/coffee -c *.coffee
+
+publish: git-check
+	npm publish
+
+test:
+	TEMPDIR := $(shell mktemp -d)
+	cd $(TEMPDIR); git clone https://github.com/motif/Moonbase.git my-project
+	cd $(TEMPDIR)/my-project; make
+
+### Utilities
+
+git-check:
+	@status=$$(git status --porcelain); \
+	if test "x$${status}" = x; then \
+		git push; \
+	else \
+		echo "\n\n!!! Working directory is dirty, commit/push first !!!\n\n" >&2; exit 1 ; \
+	fi
+
+
+.PHONY: npm build clean watch upload git-check
