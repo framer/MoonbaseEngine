@@ -1,3 +1,5 @@
+TEMPDIR := $(shell mktemp -d)
+
 js:
 	./node_modules/.bin/coffee -c *.coffee
 
@@ -5,7 +7,6 @@ publish: git-check
 	npm publish
 
 test:
-	TEMPDIR := $(shell mktemp -d)
 	cd $(TEMPDIR); git clone https://github.com/motif/Moonbase.git my-project
 	cd $(TEMPDIR)/my-project; make
 
