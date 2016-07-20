@@ -291,6 +291,7 @@ gulp.task "report", ->
 		path = getTotalSizeForFileType(buildPath(paths.assets), ext)
 		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
+	# Check all html and js files to see if there's any unused CSS
 	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
 	return gulp.src(buildPath(paths.scss, "style.css"))
 		.pipe(purify(
