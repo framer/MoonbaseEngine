@@ -25,6 +25,7 @@ del = require "del"
 spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
+purify = require "gulp-purifycss"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -56,15 +57,15 @@ paths =
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
 
-isDirectory = (path) -> 
+isDirectory = (path) ->
 	try
 		return fs.lstatSync(path).isDirectory()
 	catch e
 		return false
-	
-filesInDir = (path, ext) -> 
+
+filesInDir = (path, ext) ->
 	return [] unless fs.existsSync(path)
-	fs.readdirSync(path).filter (fileName) -> 
+	fs.readdirSync(path).filter (fileName) ->
 		_.endsWith(fileName, ext)
 
 # Configuration
@@ -98,7 +99,7 @@ nunjucksPipe = -> gulpnunjucks
 
 # Webpack
 
-webpackConfig = 
+webpackConfig =
 	module:
 		loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
 	resolve: extensions: ["", ".coffee", ".js"]
@@ -250,15 +251,15 @@ gulp.task "watch", ["build"], (cb) ->
 		projectPath(paths.templates, "**/*.md")
 	], (err, events) -> gulp.start("pages")
 
-	watch [projectPath(paths.static, "**/*.*")], (err, events) -> 
+	watch [projectPath(paths.static, "**/*.*")], (err, events) ->
 		gulp.start("static")
-	watch [projectPath(paths.scss, "**/*.scss")], (err, events) -> 
+	watch [projectPath(paths.scss, "**/*.scss")], (err, events) ->
 		gulp.start("scss")
-	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) -> 
+	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) ->
 		gulp.start("coffeescript")
-	watch [projectPath(paths.javascript, "**/*.js")], (err, events) -> 
+	watch [projectPath(paths.javascript, "**/*.js")], (err, events) ->
 		gulp.start("javascript")
-	watch [projectPath(paths.sprites, "*/*.png")], (err, events) -> 
+	watch [projectPath(paths.sprites, "*/*.png")], (err, events) ->
 		gulp.start("scss")
 
 	gulp.start("server", cb)
@@ -282,12 +283,18 @@ gulp.task "server", (cb) ->
 			cb(err)
 
 gulp.task "report", ->
-	for ext in ["html", "css", "jpg", "png", "mp4", "ico"]
+	for ext in ["html", "css", "jpg", "png", "mp4"]
 		gutil.log(gutil.colors.green("#{ext} #{getTotalSizeForFileType(buildPath(paths.assets), ext)}"))
+
+	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
+	return gulp.src(buildPath(paths.scss, "style.css"))
+	    .pipe(purify(
+			[buildPath(paths.javascript, "**/*.js"), buildPath("", "**/*.html")],
+			{rejected: true}
+		))
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
 
 gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
 gulp.task("default", ["server"])
-
