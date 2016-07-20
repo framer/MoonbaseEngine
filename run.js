@@ -2,5 +2,3 @@
 
 require("coffee-script/register")
 var run = require("./run.coffee")
-
-console.log(run)
