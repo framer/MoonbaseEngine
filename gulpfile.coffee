@@ -132,9 +132,11 @@ imageminOptions =
 # Utilities
 
 getTotalSizeForFileType = (path, ext) ->
-	return execSync("find #{path} -type f -name '*.#{ext}' -exec du -ch {} + | grep total")
-		.toString().replace(/^\s+|\s+$/g, "").split(/\s/)[0]
-
+	try
+		return execSync("find '#{path}' -type f -name '*.#{ext}' -exec du -ch {} + | grep total")
+			.toString().replace(/^\s+|\s+$/g, "").split(/\s/)[0]
+	catch
+		return "0"
 # Context
 
 context =
@@ -283,8 +285,11 @@ gulp.task "server", (cb) ->
 			cb(err)
 
 gulp.task "report", ->
+
+	# Report on sizes for each file type
 	for ext in ["html", "css", "jpg", "png", "mp4"]
-		gutil.log(gutil.colors.green("#{ext} #{getTotalSizeForFileType(buildPath(paths.assets), ext)}"))
+		path = getTotalSizeForFileType(buildPath(paths.assets), ext)
+		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
 	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
 	return gulp.src(buildPath(paths.scss, "style.css"))
