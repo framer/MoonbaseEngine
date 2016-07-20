@@ -293,7 +293,7 @@ gulp.task "report", ->
 
 	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
 	return gulp.src(buildPath(paths.scss, "style.css"))
-	    .pipe(purify(
+		.pipe(purify(
 			[buildPath(paths.javascript, "**/*.js"), buildPath("", "**/*.html")],
 			{rejected: true}
 		))
