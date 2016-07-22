@@ -248,22 +248,25 @@ gulp.task "md5", ["build"], ->
 
 gulp.task "watch", ["build"], (cb) ->
 
+	# Wait 100ms before we actually reload
+	options = {debounceDelay: 100}
+
 	watch [
 		projectPath(paths.pages, "**/*.html"),
 		projectPath(paths.pages, "**/*.md"),
 		projectPath(paths.templates, "**/*.html"),
 		projectPath(paths.templates, "**/*.md")
-	], (err, events) -> gulp.start("pages")
+	], options, (err, events) -> gulp.start("pages")
 
-	watch [projectPath(paths.static, "**/*.*")], (err, events) ->
+	watch [projectPath(paths.static, "**/*.*")], options, (err, events) ->
 		gulp.start("static")
-	watch [projectPath(paths.scss, "**/*.scss")], (err, events) ->
+	watch [projectPath(paths.scss, "**/*.scss")], options, (err, events) ->
 		gulp.start("scss")
-	watch [projectPath(paths.coffeescript, "**/*.coffee")], (err, events) ->
+	watch [projectPath(paths.coffeescript, "**/*.coffee")], options, (err, events) ->
 		gulp.start("coffeescript")
-	watch [projectPath(paths.javascript, "**/*.js")], (err, events) ->
+	watch [projectPath(paths.javascript, "**/*.js")], options, (err, events) ->
 		gulp.start("javascript")
-	watch [projectPath(paths.sprites, "*/*.png")], (err, events) ->
+	watch [projectPath(paths.sprites, "*/*.png")], options, (err, events) ->
 		gulp.start("scss")
 
 	gulp.start("server", cb)
@@ -286,7 +289,7 @@ gulp.task "server", (cb) ->
 			}, app).listen(serverPort)
 
 			livereload.listen({
-				port: livereloadPort, 
+				port: livereloadPort,
 				basePath: buildPath(),
 				key: fs.readFileSync(sslKey),
 				cert: fs.readFileSync(sslCert)
