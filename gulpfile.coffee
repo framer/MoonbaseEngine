@@ -28,6 +28,8 @@ spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
 purify = require "gulp-purifycss"
+postcss = require "gulp-postcss"
+autoprefixer = require "autoprefixer"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -166,8 +168,9 @@ gulp.task "scss", ["sprites"], ->
 		.pipe(plumber())
 		#.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
+		.pipe(postcss([ autoprefixer({ browsers: ['last 2 versions'] }) ]))
 		#.pipe(minifycss(rebase: false))
-		#.pipe(sourcemaps.write("."))
+		# .pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
 
