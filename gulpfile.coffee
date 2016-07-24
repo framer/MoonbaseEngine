@@ -167,13 +167,15 @@ gulp.task "pages", ->
 		.pipe(livereload())
 
 gulp.task "csslint", ->
-	gulp.src(projectPath(paths.scss, "**/*.scss"))
-		.pipe(plumber())
-		.pipe(stylelint({
-			reporters: [
-				{formatter: 'string', console: true}
-			]
-		}))
+
+	if fs.existsSync(projectPath("", ".stylelintrc"))
+		gulp.src(projectPath(paths.scss, "**/*.scss"))
+			.pipe(plumber())
+			.pipe(stylelint({
+				reporters: [
+					{formatter: 'string', console: true}
+				]
+			}))
 
 gulp.task "scss", ["csslint", "sprites"], ->
 	processors = [
@@ -336,16 +338,12 @@ gulp.task "report", ["csslint"], ->
 	return gulp.src(buildPath(paths.scss, "style.css"))
 		.pipe(purify(
 			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
-			{
-				rejected: true,
-				whitelist: commonResetClasses
-			}
+			{rejected: true, whitelist: commonResetClasses}
 		))
 		.pipe(postcss([
 			colorguard(),
 			reporter({clearMessages: true, noPlugin: true, noIcon: true})
 		]))
-
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
