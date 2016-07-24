@@ -30,6 +30,7 @@
     "gulp-purifycss": "^0.2.0",
     "gulp-sass": "^2.0.4",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-stylelint": "^3.0.0",
     "gulp-util": "^3.0.6",
     "gulp-watch": "^4.3.5",
     "gulp.spritesmith": "^6.2.1",

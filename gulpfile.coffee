@@ -30,6 +30,7 @@ md5 = require "gulp-md5-assets"
 purify = require "gulp-purifycss"
 postcss = require "gulp-postcss"
 autoprefixer = require "autoprefixer"
+stylelint = require "gulp-stylelint"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -163,14 +164,24 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
-gulp.task "scss", ["sprites"], ->
+gulp.task "csslint", ->
+	gulp.src(projectPath(paths.scss, "**/*.scss"))
+		.pipe(plumber())
+		.pipe(stylelint({
+			reporters: [
+				{formatter: 'string', console: true}
+			]
+		}))
+
+gulp.task "scss", ["csslint", "sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(plumber())
-		#.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
 		.pipe(postcss([ autoprefixer({ browsers: ['last 2 versions'] }) ]))
+
+		#.pipe(sourcemaps.init())
 		#.pipe(minifycss(rebase: false))
-		# .pipe(sourcemaps.write("."))
+		#.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
 
