@@ -29,8 +29,10 @@ imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
 purify = require "gulp-purifycss"
 postcss = require "gulp-postcss"
+reporter = require "postcss-reporter"
 autoprefixer = require "autoprefixer"
 stylelint = require "gulp-stylelint"
+colorguard = require "colorguard"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -177,7 +179,7 @@ gulp.task "scss", ["csslint", "sprites"], ->
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(plumber())
 		.pipe(sass().on("error", sass.logError))
-		.pipe(postcss([ autoprefixer({ browsers: ['last 2 versions'] }) ]))
+		.pipe(postcss(autoprefixer({ browsers: ['last 2 versions'] })))
 
 		#.pipe(sourcemaps.init())
 		#.pipe(minifycss(rebase: false))
@@ -322,12 +324,25 @@ gulp.task "report", ->
 		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
 	# Check all html and js files to see if there's any unused CSS
-	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
+	commonResetClasses = [
+		"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus"
+	]
+
+	gutil.log(gutil.colors.green("Analyzing CSS..."))
 	return gulp.src(buildPath(paths.scss, "style.css"))
 		.pipe(purify(
-			[buildPath(paths.javascript, "**/*.js"), buildPath("", "**/*.html")],
-			{rejected: true}
+			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
+			{
+				rejected: true,
+				whitelist: commonResetClasses
+			}
 		))
+		.pipe(postcss([
+			colorguard(),
+			reporter({clearMessages: true, noPlugin: true, noIcon: true})
+		]))
+
+
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
