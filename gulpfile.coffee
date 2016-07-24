@@ -176,14 +176,18 @@ gulp.task "csslint", ->
 		}))
 
 gulp.task "scss", ["csslint", "sprites"], ->
+	processors = [
+		autoprefixer({ browsers: ['last 2 versions'] }),
+		reporter({clearMessages: true, noPlugin: true, noIcon: true})
+	]
+
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(plumber())
+		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
-		.pipe(postcss(autoprefixer({ browsers: ['last 2 versions'] })))
-
-		#.pipe(sourcemaps.init())
+		.pipe(postcss(processors))
 		#.pipe(minifycss(rebase: false))
-		#.pipe(sourcemaps.write("."))
+		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
 
@@ -316,7 +320,7 @@ gulp.task "server", (cb) ->
 
 			cb(err)
 
-gulp.task "report", ->
+gulp.task "report", ["csslint"], ->
 
 	# Report on sizes for each file type
 	for ext in ["html", "css", "jpg", "png", "mp4"]
@@ -341,7 +345,6 @@ gulp.task "report", ->
 			colorguard(),
 			reporter({clearMessages: true, noPlugin: true, noIcon: true})
 		]))
-
 
 
 gulp.task "clean", ->
