@@ -165,18 +165,21 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
-gulp.task "csslint", ->
+gulp.task "stylelint", ->
 
-	if fs.existsSync(projectPath("", ".stylelintrc"))
+	# Check if there's a stylelint configuration
+	settings = JSON.parse(fs.readFileSync('./package.json'))
+	if settings.stylelint or fs.existsSync(projectPath("", ".stylelintrc"))
 		gulp.src(projectPath(paths.scss, "**/*.scss"))
 			.pipe(plumber())
 			.pipe(stylelint({
 				reporters: [
 					{formatter: 'string', console: true}
 				]
-			}))
+		}))
 
-gulp.task "scss", ["csslint", "sprites"], ->
+
+gulp.task "scss", ["stylelint", "sprites"], ->
 	processors = [
 		autoprefixer({ browsers: ['last 2 versions'] }),
 		reporter({clearMessages: true, noPlugin: true, noIcon: true})
@@ -321,7 +324,7 @@ gulp.task "server", (cb) ->
 
 			cb(err)
 
-gulp.task "report", ["csslint"], ->
+gulp.task "report", ["stylelint"], ->
 
 	# Report on sizes for each file type
 	for ext in ["html", "css", "jpg", "png", "mp4"]
