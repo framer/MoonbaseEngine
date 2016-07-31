@@ -32,7 +32,6 @@ postcss = require "gulp-postcss"
 reporter = require "postcss-reporter"
 autoprefixer = require "autoprefixer"
 stylelint = require "gulp-stylelint"
-colorguard = require "colorguard"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -334,16 +333,12 @@ gulp.task "report", ["csslint"], ->
 		"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus"
 	]
 
-	gutil.log(gutil.colors.green("Analyzing CSS..."))
+	gutil.log(gutil.colors.green("Unused CSS"))
 	return gulp.src(buildPath(paths.scss, "style.css"))
 		.pipe(purify(
 			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
 			{rejected: true, whitelist: commonResetClasses}
 		))
-		.pipe(postcss([
-			colorguard(),
-			reporter({clearMessages: true, noPlugin: true, noIcon: true})
-		]))
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
