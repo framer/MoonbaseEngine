@@ -179,7 +179,7 @@ gulp.task "stylelint", ->
 		}))
 
 
-gulp.task "scss", ["stylelint", "sprites"], ->
+gulp.task "scss", ["sprites"], ->
 	processors = [
 		autoprefixer({ browsers: ['last 2 versions'] }),
 		reporter({clearMessages: true, noPlugin: true, noIcon: true})
