@@ -178,19 +178,17 @@ gulp.task "stylelint", ->
 				]
 		}))
 
-
 gulp.task "scss", ["sprites"], ->
-	processors = [
-		autoprefixer({ browsers: ['last 2 versions'] }),
-		reporter({clearMessages: true, noPlugin: true, noIcon: true})
-	]
+	processors = []
+
+	if config.style?.autoprefixer?
+		processors.push(autoprefixer({ browsers: [config.style.autoprefixer] }))
 
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
 		.pipe(postcss(processors))
-		#.pipe(minifycss(rebase: false))
 		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
