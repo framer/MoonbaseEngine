@@ -28,6 +28,10 @@ spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
 purify = require "gulp-purifycss"
+postcss = require "gulp-postcss"
+reporter = require "postcss-reporter"
+autoprefixer = require "autoprefixer"
+stylelint = require "gulp-stylelint"
 
 lr = require "connect-livereload"
 st = require "st"
@@ -161,13 +165,31 @@ gulp.task "pages", ->
 		.pipe(gulp.dest(buildPath()))
 		.pipe(livereload())
 
+gulp.task "stylelint", ->
+
+	# Check if there's a stylelint configuration
+	settings = JSON.parse(fs.readFileSync('./package.json'))
+	if settings.stylelint or fs.existsSync(projectPath("", ".stylelintrc"))
+		gulp.src(projectPath(paths.scss, "**/*.scss"))
+			.pipe(plumber())
+			.pipe(stylelint({
+				reporters: [
+					{formatter: 'string', console: true}
+				]
+		}))
+
 gulp.task "scss", ["sprites"], ->
+	processors = []
+
+	if config.style?.autoprefixer?
+		processors.push(autoprefixer({ browsers: [config.style.autoprefixer] }))
+
 	gulp.src(projectPath(paths.scss, "*.scss"))
 		.pipe(plumber())
-		#.pipe(sourcemaps.init())
+		.pipe(sourcemaps.init())
 		.pipe(sass().on("error", sass.logError))
-		#.pipe(minifycss(rebase: false))
-		#.pipe(sourcemaps.write("."))
+		.pipe(postcss(processors))
+		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(livereload())
 
@@ -300,7 +322,7 @@ gulp.task "server", (cb) ->
 
 			cb(err)
 
-gulp.task "report", ->
+gulp.task "report", ["stylelint"], ->
 
 	# Report on sizes for each file type
 	for ext in ["html", "css", "jpg", "png", "mp4"]
@@ -308,11 +330,15 @@ gulp.task "report", ->
 		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
 	# Check all html and js files to see if there's any unused CSS
-	gutil.log(gutil.colors.green("Checking unused CSS selectors..."))
+	commonResetClasses = [
+		"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus", "ins"
+	]
+
+	gutil.log(gutil.colors.green("Unused CSS"))
 	return gulp.src(buildPath(paths.scss, "style.css"))
 		.pipe(purify(
-			[buildPath(paths.javascript, "**/*.js"), buildPath("", "**/*.html")],
-			{rejected: true}
+			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
+			{rejected: true, whitelist: commonResetClasses}
 		))
 
 gulp.task "clean", ->
