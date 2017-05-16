@@ -5,7 +5,7 @@ publish: git-check
 
 test:
 	cd $(TEMPDIR); git clone https://github.com/motif/Moonbase.git my-project
-	cd $(TEMPDIR)/my-project; ied install -b; make
+	cd $(TEMPDIR)/my-project; yarn; make
 
 ### Utilities
 

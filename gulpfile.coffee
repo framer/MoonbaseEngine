@@ -27,7 +27,6 @@ del = require "del"
 spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
-purify = require "gulp-purifycss"
 postcss = require "gulp-postcss"
 reporter = require "postcss-reporter"
 autoprefixer = require "autoprefixer"
@@ -329,17 +328,17 @@ gulp.task "report", ["stylelint"], ->
 		path = getTotalSizeForFileType(buildPath(paths.assets), ext)
 		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
-	# Check all html and js files to see if there's any unused CSS
-	commonResetClasses = [
-		"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus", "ins"
-	]
+	# # Check all html and js files to see if there's any unused CSS
+	# commonResetClasses = [
+	# 	"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus", "ins"
+	# ]
 
-	gutil.log(gutil.colors.green("Unused CSS"))
-	return gulp.src(buildPath(paths.scss, "style.css"))
-		.pipe(purify(
-			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
-			{rejected: true, whitelist: commonResetClasses}
-		))
+	# gutil.log(gutil.colors.green("Unused CSS"))
+	# return gulp.src(buildPath(paths.scss, "style.css"))
+	# 	.pipe(purify(
+	# 		[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
+	# 		{rejected: true, whitelist: commonResetClasses}
+	# 	))
 
 gulp.task "clean", ->
 	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
