@@ -13,6 +13,7 @@ nunjucksDate = require "nunjucks-date"
 browserSync = require("browser-sync").create();
 sass = require "gulp-sass"
 changed = require "gulp-changed"
+changedInPlace = require('gulp-changed-in-place');
 watch = require "gulp-watch"
 webpack = require "webpack-stream"
 plumber = require "gulp-plumber"
@@ -158,6 +159,7 @@ gulp.task "pages", ->
 	config.before?(context)
 	gulp.src(projectPath(paths.pages, "**/*"))
 		.pipe(plumber())
+		.pipe(changedInPlace())
 		.pipe(data((file) -> config.page?(file.path.replace(projectPath(paths.pages), ""), file, context)))
 		.pipe(nunjucksPipe())
 		.pipe(gulp.dest(buildPath()))

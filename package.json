@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "autoprefixer": "^6.3.7",
+    "browser-sync": "^2.23.6",
     "coffee-loader": "^0.7.2",
     "coffee-script": "^1.10.0",
     "colorguard": "^1.2.0",
@@ -51,8 +52,7 @@
     "st": "^1.1.0",
     "through2": "^2.0.0",
     "vinyl-named": "^1.1.0",
-    "webpack-stream": "^3.2.0",
-    "browser-sync": "^2.23.6"
+    "webpack-stream": "^3.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -66,5 +66,8 @@
     "url": "https://github.com/motif/moonbase.git"
   },
   "author": "Koen Bok",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "gulp-changed-in-place": "^2.3.0"
+  }
 }
