@@ -24,7 +24,6 @@ emptytask = require "gulp-empty"
 data = require "gulp-data"
 newy = require "./vendor/newy"
 del = require "del"
-spritesmith = require "gulp.spritesmith"
 imagemin = require "imagemin-pngquant"
 md5 = require "gulp-md5-assets"
 postcss = require "gulp-postcss"
@@ -57,7 +56,6 @@ paths =
 	scss: 			"assets/css"
 	javascript: 	"assets/scripts"
 	coffeescript: 	"assets/scripts"
-	sprites:		"assets/sprites"
 
 projectPath = 	(path="", fileTypes="") -> join(workingPath, path, fileTypes)
 buildPath = 	(path="", fileTypes="") -> join(workingPath, paths.build, path, fileTypes)
@@ -177,7 +175,7 @@ gulp.task "stylelint", ->
 				]
 		}))
 
-gulp.task "scss", ["sprites"], ->
+gulp.task "scss", ->
 	processors = []
 
 	if config.style?.autoprefixer?
@@ -216,46 +214,6 @@ gulp.task "javascript", ->
 		.pipe(gulp.dest(buildPath(paths.javascript)))
 		.pipe(livereload())
 
-gulp.task "sprites", ->
-
-	return emptytask unless isDirectory(projectPath(paths.sprites))
-
-	sprites = fs.readdirSync(projectPath(paths.sprites)).filter (fileName) ->
-		isDirectory(join(projectPath(paths.sprites), fileName))
-
-	return emptytask unless sprites.length > 0
-
-	merge sprites.map (fileName) ->
-
-		spriteImagesPath = projectPath(paths.sprites, "#{fileName}/*.png")
-		spriteImagesPath2x = projectPath(paths.sprites, "#{fileName}/*@2x.png")
-		spriteOutputPath = buildPath(paths.sprites, "#{fileName}.png")
-
-		spriteData = gulp.src(spriteImagesPath)
-			# .pipe(newy((projectDir, srcFile, absSrcFile) ->
-			# 	return projectPath(join("assets", "sprites", "#{fileName}.scss"))
-			# ))
-			.pipe(plumber())
-			.pipe(spritesmith({
-				retinaSrcFilter: [spriteImagesPath2x],
-				imgName: "#{fileName}.png",
-				retinaImgName: "../sprites/#{fileName}@2x.png",
-				cssName: "#{fileName}.scss",
-				imgPath: "../sprites/#{fileName}.png"
-				retinaImgPath: "../sprites/#{fileName}@2x.png"
-			}
-		))
-
-		imgStream = spriteData.img
-			#.pipe(imagemin(imageminOptions)())
-			.pipe(gulp.dest(buildPath(paths.sprites)));
-
-		cssStream = spriteData.css
-			# .pipe(csso())
-			.pipe(gulp.dest(projectPath(paths.sprites)));
-
-		return merge(imgStream, cssStream).pipe(livereload())
-
 gulp.task "imagemin", ->
 	return gulp.src(projectPath(paths.static, "**/*.png"))
 		.pipe(plumber())
@@ -287,8 +245,6 @@ gulp.task "watch", ["build"], (cb) ->
 		gulp.start("coffeescript")
 	watch [projectPath(paths.javascript, "**/*.js")], options, (err, events) ->
 		gulp.start("javascript")
-	watch [projectPath(paths.sprites, "*/*.png")], options, (err, events) ->
-		gulp.start("scss")
 
 	gulp.start("server", cb)
 
@@ -341,7 +297,7 @@ gulp.task "report", ["stylelint"], ->
 	# 	))
 
 gulp.task "clean", ->
-	return del([buildPath(), projectPath(paths.sprites, "*.scss")])
+	return del([buildPath(), "*.scss"])
 
 gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
 gulp.task("default", ["server"])
