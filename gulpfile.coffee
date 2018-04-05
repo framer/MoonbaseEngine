@@ -102,11 +102,8 @@ nunjucksPipe = -> gulpnunjucks
 		return env
 
 # Webpack
-
 webpackConfig =
-	module:
-		loaders: [{test: /\.coffee$/, loader: "coffee-loader"}]
-	resolve: extensions: ["", ".coffee", ".js"]
+	resolve: extensions: ["", ".js"]
 	resolveLoader: {root: join(__dirname, "node_modules")}
 	output:
 		filename: "[name].js"
@@ -114,27 +111,17 @@ webpackConfig =
 	quiet: true
 	watch: false
 	devtool: "sourcemap"
-
-webpackConfigPlugins = [
-	new webpack.webpack.optimize.DedupePlugin(),
-	new webpack.webpack.optimize.UglifyJsPlugin()
-]
-
-webpackConfigJavaScript = _.cloneDeep(webpackConfig)
-webpackConfigJavaScript.output.filename = "[name].js"
-webpackConfigJavaScript.plugins = webpackConfigPlugins
-webpackConfigCoffeeScript = _.cloneDeep(webpackConfig)
-webpackConfigCoffeeScript.output.filename = "[name].coffee.js"
-webpackConfigCoffeeScript.plugins = webpackConfigPlugins
+	plugins: [
+		new webpack.webpack.optimize.DedupePlugin(),
+		new webpack.webpack.optimize.UglifyJsPlugin()
+	]
 
 # Imagemin
-
 imageminOptions =
 	quality: process.env.MOONBASE_IMAGEMIN_QUALITY or "65-80"
 	speed: process.env.MOONBASE_IMAGEMIN_SPEED or 4
 
 # Utilities
-
 getTotalSizeForFileType = (path, ext) ->
 	try
 		return execSync("find '#{path}' -type f -name '*.#{ext}' -exec du -ch {} + | grep total")
@@ -166,7 +153,6 @@ gulp.task "pages", ->
 		.pipe(browserSync.stream())
 
 gulp.task "stylelint", ->
-
 	# Check if there's a stylelint configuration
 	settings = JSON.parse(fs.readFileSync('./package.json'))
 	if settings.stylelint or fs.existsSync(projectPath("", ".stylelintrc"))
@@ -193,18 +179,6 @@ gulp.task "scss", ->
 		.pipe(gulp.dest(buildPath(paths.scss)))
 		.pipe(browserSync.stream())
 
-gulp.task "coffeescript", ->
-
-	return emptytask unless filesInDir(
-		projectPath(paths.coffeescript), ".coffee").length
-
-	gulp.src(projectPath(paths.coffeescript, "*.coffee"))
-		.pipe(plumber())
-		.pipe(named())
-		.pipe(webpack(webpackConfigCoffeeScript))
-		.pipe(gulp.dest(buildPath(paths.coffeescript)))
-		.pipe(browserSync.stream())
-
 gulp.task "javascript", ->
 
 	return emptytask unless filesInDir(
@@ -213,14 +187,14 @@ gulp.task "javascript", ->
 	gulp.src(projectPath(paths.javascript, "*.js"))
 		.pipe(plumber())
 		.pipe(named())
-		.pipe(webpack(webpackConfigJavaScript))
+		.pipe(webpack(webpackConfig))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
 		.pipe(browserSync.stream())
 
 gulp.task "imagemin", ->
 	return gulp.src(projectPath(paths.static, "**/*.png"))
 		.pipe(plumber())
-		.pipe(imagemin(imageminOptions)())
+		.pipe(imagemin(imageminOptions()))
 		.pipe(gulp.dest(projectPath(paths.static)))
 
 gulp.task "md5", ["build"], ->
@@ -230,23 +204,18 @@ gulp.task "md5", ["build"], ->
 
 gulp.task "watch", ["build"], (cb) ->
 
-	# Wait 100ms before we actually reload
-	options = {debounceDelay: 100}
-
 	watch [
 		projectPath(paths.pages, "**/*.html"),
 		projectPath(paths.pages, "**/*.md"),
 		projectPath(paths.templates, "**/*.html"),
 		projectPath(paths.templates, "**/*.md")
-	], options, (err, events) -> gulp.start("pages")
+	], (err, events) -> gulp.start("pages")
 
-	watch [projectPath(paths.static, "**/*.*")], options, (err, events) ->
+	watch [projectPath(paths.static, "**/*.*")], (err, events) ->
 		gulp.start("static")
-	watch [projectPath(paths.scss, "**/*.scss")], options, (err, events) ->
+	watch [projectPath(paths.scss, "**/*.scss")], (err, events) ->
 		gulp.start("scss")
-	watch [projectPath(paths.coffeescript, "**/*.coffee")], options, (err, events) ->
-		gulp.start("coffeescript")
-	watch [projectPath(paths.javascript, "**/*.js")], options, (err, events) ->
+	watch [projectPath(paths.javascript, "**/*.js")], (err, events) ->
 		gulp.start("javascript")
 
 	gulp.start("server", cb)
@@ -300,5 +269,5 @@ gulp.task "report", ->
 gulp.task "clean", ->
 	return del([buildPath(), "*.scss"])
 
-gulp.task("build", ["pages", "static", "scss", "coffeescript", "javascript"])
+gulp.task("build", ["pages", "static", "scss", "javascript"])
 gulp.task("default", ["server"])
