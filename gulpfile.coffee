@@ -10,7 +10,7 @@ gutil = require "gulp-util"
 
 gulpnunjucks = require "gulp-nunjucks-html"
 nunjucksDate = require "nunjucks-date"
-livereload = require "gulp-livereload"
+browserSync = require("browser-sync").create();
 sass = require "gulp-sass"
 changed = require "gulp-changed"
 watch = require "gulp-watch"
@@ -30,8 +30,8 @@ postcss = require "gulp-postcss"
 reporter = require "postcss-reporter"
 autoprefixer = require "autoprefixer"
 stylelint = require "gulp-stylelint"
+purify = require "gulp-purifycss"
 
-lr = require "connect-livereload"
 st = require "st"
 portfinder = require "portfinder"
 express = require "express"
@@ -140,6 +140,7 @@ getTotalSizeForFileType = (path, ext) ->
 			.toString().replace(/^\s+|\s+$/g, "").split(/\s/)[0]
 	catch
 		return "0"
+
 # Context
 
 context =
@@ -151,7 +152,7 @@ gulp.task "static", ->
 	gulp.src(projectPath(paths.static, "**/*.*"))
 		.pipe(changed(buildPath(paths.static)))
 		.pipe(gulp.dest(buildPath(paths.static)))
-		.pipe(livereload())
+		.pipe(browserSync.stream())
 
 gulp.task "pages", ->
 	config.before?(context)
@@ -160,7 +161,7 @@ gulp.task "pages", ->
 		.pipe(data((file) -> config.page?(file.path.replace(projectPath(paths.pages), ""), file, context)))
 		.pipe(nunjucksPipe())
 		.pipe(gulp.dest(buildPath()))
-		.pipe(livereload())
+		.pipe(browserSync.stream())
 
 gulp.task "stylelint", ->
 
@@ -188,7 +189,7 @@ gulp.task "scss", ->
 		.pipe(postcss(processors))
 		.pipe(sourcemaps.write("."))
 		.pipe(gulp.dest(buildPath(paths.scss)))
-		.pipe(livereload())
+		.pipe(browserSync.stream())
 
 gulp.task "coffeescript", ->
 
@@ -200,7 +201,7 @@ gulp.task "coffeescript", ->
 		.pipe(named())
 		.pipe(webpack(webpackConfigCoffeeScript))
 		.pipe(gulp.dest(buildPath(paths.coffeescript)))
-		.pipe(livereload())
+		.pipe(browserSync.stream())
 
 gulp.task "javascript", ->
 
@@ -212,7 +213,7 @@ gulp.task "javascript", ->
 		.pipe(named())
 		.pipe(webpack(webpackConfigJavaScript))
 		.pipe(gulp.dest(buildPath(paths.javascript)))
-		.pipe(livereload())
+		.pipe(browserSync.stream())
 
 gulp.task "imagemin", ->
 	return gulp.src(projectPath(paths.static, "**/*.png"))
@@ -252,49 +253,47 @@ gulp.task "server", (cb) ->
 
 	portfinder.getPort (err, serverPort)  ->
 		portfinder.basePort = 10000
-		portfinder.getPort (err, livereloadPort)  ->
 
-			sslKey = "#{__dirname}/ssl/key.pem"
-			sslCert = "#{__dirname}/ssl/cert.pem"
+		sslKey = "#{__dirname}/ssl/key.pem"
+		sslCert = "#{__dirname}/ssl/cert.pem"
 
-			app = express()
-			app.use(lr(port:livereloadPort))
-			app.use(express.static(buildPath()))
-			https.createServer({
-				key: fs.readFileSync(sslKey),
-				cert: fs.readFileSync(sslCert)
-			}, app).listen(serverPort)
+		app = express()
+		app.use(express.static(buildPath()))
+		https.createServer({
+			key: fs.readFileSync(sslKey),
+			cert: fs.readFileSync(sslCert)
+		}, app).listen(serverPort)
 
-			livereload.listen({
-				port: livereloadPort,
-				basePath: buildPath(),
-				key: fs.readFileSync(sslKey),
-				cert: fs.readFileSync(sslCert)
-			})
+		browserSync.init({
+			proxy: "https://localhost:#{serverPort}",
+			# https: {
+			# 	key: fs.readFileSync(sslKey),
+			# 	cert: fs.readFileSync(sslCert)
+			# }
+		})
 
-			gutil.log(gutil.colors.green("Serving at: https://#{ip.address()}:#{serverPort}"))
-			gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
+		cb(err)
 
-			cb(err)
-
-gulp.task "report", ["stylelint"], ->
+gulp.task "report", ->
 
 	# Report on sizes for each file type
+	gutil.log(gutil.colors.cyan("Total file sizes:"))
 	for ext in ["html", "css", "jpg", "png", "mp4"]
 		path = getTotalSizeForFileType(buildPath(paths.assets), ext)
 		gutil.log(gutil.colors.green("#{ext} #{path}"))
 
-	# # Check all html and js files to see if there's any unused CSS
-	# commonResetClasses = [
-	# 	"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus", "ins"
-	# ]
-
-	# gutil.log(gutil.colors.green("Unused CSS"))
-	# return gulp.src(buildPath(paths.scss, "style.css"))
-	# 	.pipe(purify(
-	# 		[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
-	# 		{rejected: true, whitelist: commonResetClasses}
-	# 	))
+	# Check all html and js files to see if there's any unused CSS
+	commonResetClasses = [
+		"applet", "blockquote", "abbr", "acronym", "cite", "del", "dfn", "kbd", "samp", "strike", "sup", "tt", "dt", "fieldset", "legend", "caption", "tfoot", "thead", "th", "figcaption", "hgroup", "mark", "blockquote", "blockquote:after", "blockquote:before", "textarea:focus", "ins"
+	]
+	
+	gutil.log("-----------------------------------------")
+	gutil.log(gutil.colors.cyan("Unused CSS:"))
+	return gulp.src(buildPath(paths.scss, "style.css"))
+		.pipe(purify(
+			[buildPath("", "**/*.html"), buildPath("", "**/*.js")],
+			{rejected: true, whitelist: commonResetClasses}
+		))
 
 gulp.task "clean", ->
 	return del([buildPath(), "*.scss"])
