@@ -35,7 +35,6 @@
     "gulp-stylelint": "^3.0.0",
     "gulp-util": "^3.0.6",
     "gulp-watch": "^4.3.5",
-    "gulp.spritesmith": "^6.2.1",
     "highlights": "^1.3.0",
     "imagemin-pngquant": "^4.2.2",
     "ip": "^1.1.3",
@@ -52,7 +51,10 @@
     "st": "^1.1.0",
     "through2": "^2.0.0",
     "vinyl-named": "^1.1.0",
-    "webpack-stream": "^3.2.0"
+    "webpack-stream": "^4.0.3",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp-changed-in-place": "^2.3.0",
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -66,8 +68,5 @@
     "url": "https://github.com/motif/moonbase.git"
   },
   "author": "Koen Bok",
-  "license": "MIT",
-  "devDependencies": {
-    "gulp-changed-in-place": "^2.3.0"
-  }
+  "license": "MIT"
 }
