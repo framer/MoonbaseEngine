@@ -23,6 +23,8 @@ var nunjucksDate = require("nunjucks-date");
 var plumber = require("gulp-plumber");
 var portfinder = require("portfinder");
 var postcss = require("gulp-postcss");
+var cssnext = require("postcss-cssnext");
+var cssnano = require("cssnano");
 var purify = require("gulp-purifycss");
 var reporter = require("postcss-reporter");
 var sass = require("gulp-sass");
@@ -38,7 +40,7 @@ var paths = {
   templates: "templates",
   pages: "pages",
   static: "assets/static",
-  scss: "assets/css",
+  css: "assets/css",
   javascript: "assets/scripts",
   coffeescript: "assets/scripts"
 };
@@ -183,7 +185,7 @@ gulp.task("stylelint", function() {
   settings = JSON.parse(fs.readFileSync("./package.json"));
   if (settings.stylelint || fs.existsSync(projectPath("", ".stylelintrc"))) {
     return gulp
-      .src(projectPath(paths.scss, "**/*.scss"))
+      .src(projectPath(paths.css, "**/*.css"))
       .pipe(plumber())
       .pipe(
         stylelint({
@@ -198,24 +200,12 @@ gulp.task("stylelint", function() {
   }
 });
 
-gulp.task("scss", function() {
-  var processors, ref;
-  processors = [];
-  if (((ref = config.style) != null ? ref.autoprefixer : void 0) != null) {
-    processors.push(
-      autoprefixer({
-        browsers: [config.style.autoprefixer]
-      })
-    );
-  }
+gulp.task("css", function() {
   return gulp
-    .src(projectPath(paths.scss, "*.scss"))
+    .src(projectPath(paths.css, "*.css"))
     .pipe(plumber())
-    .pipe(sourcemaps.init())
-    .pipe(sass().on("error", sass.logError))
-    .pipe(postcss(processors))
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(buildPath(paths.scss)))
+    .pipe(postcss([cssnext(), cssnano()]))
+    .pipe(gulp.dest(buildPath(paths.css)))
     .pipe(browserSync.stream());
 });
 
@@ -254,8 +244,8 @@ gulp.task("watch", ["build"], function(cb) {
   watch([projectPath(paths["static"], "**/*.*")], function(err, events) {
     return gulp.start("static");
   });
-  watch([projectPath(paths.scss, "**/*.scss")], function(err, events) {
-    return gulp.start("scss");
+  watch([projectPath(paths.css, "**/*.css")], function(err, events) {
+    return gulp.start("css");
   });
   watch([projectPath(paths.javascript, "**/*.js")], function(err, events) {
     return gulp.start("javascript");
@@ -319,7 +309,7 @@ gulp.task("report", function() {
   ];
   gutil.log("-----------------------------------------");
   gutil.log(gutil.colors.cyan("Unused CSS:"));
-  return gulp.src(buildPath(paths.scss, "style.css")).pipe(
+  return gulp.src(buildPath(paths.css, "style.css")).pipe(
     purify([buildPath("", "**/*.html"), buildPath("", "**/*.js")], {
       rejected: true,
       whitelist: commonResetClasses
@@ -328,9 +318,9 @@ gulp.task("report", function() {
 });
 
 gulp.task("clean", function() {
-  return del([buildPath(), "*.scss"]);
+  return del([buildPath(), "*.css"]);
 });
 
-gulp.task("build", ["pages", "static", "scss", "javascript"]);
+gulp.task("build", ["pages", "static", "css", "javascript"]);
 
 gulp.task("default", ["server"]);

@@ -7,8 +7,8 @@
     "doc": "docs"
   },
   "dependencies": {
-    "autoprefixer": "^6.3.7",
     "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
     "browser-sync": "^2.23.6",
     "colors": "^1.1.2",
@@ -26,7 +26,7 @@
     "gulp-minify-css": "^1.2.1",
     "gulp-nunjucks-html": "^2.0.0",
     "gulp-plumber": "^1.0.1",
-    "gulp-postcss": "^6.1.1",
+    "gulp-postcss": "^7.0.1",
     "gulp-purifycss": "^0.2.0",
     "gulp-sass": "^2.0.4",
     "gulp-sourcemaps": "^1.6.0",
@@ -44,13 +44,14 @@
     "nunjucks-date": "^1.2.0",
     "nunjucks-markdown": "^2.0.0",
     "portfinder": "^1.0.3",
+    "postcss-cssnext": "^3.1.0",
     "postcss-reporter": "^1.4.1",
     "pretty-hrtime": "^1.0.0",
     "st": "^1.1.0",
     "through2": "^2.0.0",
     "vinyl-named": "^1.1.0",
     "webpack-stream": "^4.0.3",
-    "babel-loader": "^7.1.4"
+    "cssnano": "^3.10.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
