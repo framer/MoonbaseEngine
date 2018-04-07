@@ -178,23 +178,28 @@ nunjucksPipe = function() {
 };
 
 webpackConfig = {
-  resolve: {
-    extensions: ["", ".js"]
+  module: {
+    rules: [
+      {
+        test: /.js?$/,
+        loader: "babel-loader",
+        query: {
+          presets: ["env"]
+        }
+      }
+    ]
   },
-  resolveLoader: {
-    root: join(__dirname, "node_modules")
+  resolve: {
+    extensions: [".js"],
+    modules: [join(__dirname, "node_modules"), "node_modules"]
   },
   output: {
     filename: "[name].js"
   },
   cache: true,
-  quiet: true,
   watch: false,
   devtool: "sourcemap",
-  plugins: [
-    new webpack.webpack.optimize.DedupePlugin(),
-    new webpack.webpack.optimize.UglifyJsPlugin()
-  ]
+  plugins: [new webpack.webpack.optimize.UglifyJsPlugin()]
 };
 
 imageminOptions = {
