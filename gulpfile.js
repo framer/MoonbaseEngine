@@ -142,28 +142,6 @@ var webpackConfig = {
   plugins: [new webpack.webpack.optimize.UglifyJsPlugin()]
 };
 
-var imageminOptions = {
-  quality: process.env.MOONBASE_IMAGEMIN_QUALITY || "65-80",
-  speed: process.env.MOONBASE_IMAGEMIN_SPEED || 4
-};
-
-var getTotalSizeForFileType = function(path, ext) {
-  try {
-    return execSync(
-      "find '" +
-        path +
-        "' -type f -name '*." +
-        ext +
-        "' -exec du -ch {} + | grep total"
-    )
-      .toString()
-      .replace(/^\s+|\s+$/g, "")
-      .split(/\s/)[0];
-  } catch (_error) {
-    return "0";
-  }
-};
-
 var context = {
   nunjucks: nunjucks
 };
@@ -254,14 +232,6 @@ gulp.task("javascript", function() {
     .pipe(browserSync.stream());
 });
 
-gulp.task("imagemin", function() {
-  return gulp
-    .src(projectPath(paths["static"], "**/*.png"))
-    .pipe(plumber())
-    .pipe(imagemin(imageminOptions()))
-    .pipe(gulp.dest(projectPath(paths["static"])));
-});
-
 gulp.task("md5", ["build"], function() {
   return gulp
     .src(buildPath("", "**/*.{css, js}"))
@@ -318,14 +288,6 @@ gulp.task("server", function(cb) {
 });
 
 gulp.task("report", function() {
-  var commonResetClasses, ext, i, len, path, ref;
-  gutil.log(gutil.colors.cyan("Total file sizes:"));
-  ref = ["html", "css", "jpg", "png", "mp4"];
-  for (i = 0, len = ref.length; i < len; i++) {
-    ext = ref[i];
-    path = getTotalSizeForFileType(buildPath(paths.assets), ext);
-    gutil.log(gutil.colors.green(ext + " " + path));
-  }
   commonResetClasses = [
     "applet",
     "blockquote",
