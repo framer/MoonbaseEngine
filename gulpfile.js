@@ -1,99 +1,44 @@
-var Highlights,
-  _,
-  autoprefixer,
-  browserSync,
-  buildPath,
-  changed,
-  changedInPlace,
-  config,
-  context,
-  data,
-  del,
-  e,
-  emptytask,
-  execSync,
-  express,
-  filesInDir,
-  fs,
-  getTotalSizeForFileType,
-  gulp,
-  gulpif,
-  gulpnunjucks,
-  gutil,
-  highlighter,
-  https,
-  imagemin,
-  imageminOptions,
-  ip,
-  isDirectory,
-  join,
-  markdown,
-  marked,
-  md5,
-  merge,
-  minifycss,
-  named,
-  nunjucks,
-  nunjucksDate,
-  nunjucksPipe,
-  paths,
-  plumber,
-  portfinder,
-  postcss,
-  projectPath,
-  purify,
-  reporter,
-  sass,
-  sourcemaps,
-  st,
-  stylelint,
-  watch,
-  webpack,
-  webpackConfig,
-  workingPath;
+var _ = require("lodash");
+var autoprefixer = require("autoprefixer");
+var browserSync = require("browser-sync").create();
+var changed = require("gulp-changed");
+var changedInPlace = require("gulp-changed-in-place");
+var data = require("gulp-data");
+var del = require("del");
+var emptytask = require("gulp-empty");
+var execSync = require("child_process").execSync;
+var express = require("express");
+var fs = require("fs-extra");
+var gulp = require("gulp");
+var gulpif = require("gulp-if");
+var gulpnunjucks = require("gulp-nunjucks-html");
+var gutil = require("gulp-util");
+var Highlights = require("highlights");
+var https = require("https");
+var imagemin = require("imagemin-pngquant");
+var ip = require("ip");
+var join = require("path").join;
+var markdown = require("nunjucks-markdown");
+var marked = require("marked");
+var md5 = require("gulp-md5-assets");
+var merge = require("merge-stream");
+var minifycss = require("gulp-minify-css");
+var named = require("vinyl-named");
+var nunjucksDate = require("nunjucks-date");
+var plumber = require("gulp-plumber");
+var portfinder = require("portfinder");
+var postcss = require("gulp-postcss");
+var purify = require("gulp-purifycss");
+var reporter = require("postcss-reporter");
+var sass = require("gulp-sass");
+var sourcemaps = require("gulp-sourcemaps");
+var st = require("st");
+var stylelint = require("gulp-stylelint");
+var watch = require("gulp-watch");
+var webpack = require("webpack-stream");
+var workingPath = process.cwd();
 
-_ = require("lodash");
-autoprefixer = require("autoprefixer");
-browserSync = require("browser-sync").create();
-changed = require("gulp-changed");
-changedInPlace = require("gulp-changed-in-place");
-data = require("gulp-data");
-del = require("del");
-emptytask = require("gulp-empty");
-execSync = require("child_process").execSync;
-express = require("express");
-fs = require("fs-extra");
-gulp = require("gulp");
-gulpif = require("gulp-if");
-gulpnunjucks = require("gulp-nunjucks-html");
-gutil = require("gulp-util");
-Highlights = require("highlights");
-https = require("https");
-imagemin = require("imagemin-pngquant");
-ip = require("ip");
-join = require("path").join;
-markdown = require("nunjucks-markdown");
-marked = require("marked");
-md5 = require("gulp-md5-assets");
-merge = require("merge-stream");
-minifycss = require("gulp-minify-css");
-named = require("vinyl-named");
-nunjucksDate = require("nunjucks-date");
-plumber = require("gulp-plumber");
-portfinder = require("portfinder");
-postcss = require("gulp-postcss");
-purify = require("gulp-purifycss");
-reporter = require("postcss-reporter");
-sass = require("gulp-sass");
-sourcemaps = require("gulp-sourcemaps");
-st = require("st");
-stylelint = require("gulp-stylelint");
-watch = require("gulp-watch");
-webpack = require("webpack-stream");
-
-workingPath = process.cwd();
-
-paths = {
+var paths = {
   build: ".build",
   templates: "templates",
   pages: "pages",
@@ -103,7 +48,7 @@ paths = {
   coffeescript: "assets/scripts"
 };
 
-projectPath = function(path, fileTypes) {
+var projectPath = function(path, fileTypes) {
   if (path == null) {
     path = "";
   }
@@ -113,7 +58,7 @@ projectPath = function(path, fileTypes) {
   return join(workingPath, path, fileTypes);
 };
 
-buildPath = function(path, fileTypes) {
+var buildPath = function(path, fileTypes) {
   if (path == null) {
     path = "";
   }
@@ -123,7 +68,7 @@ buildPath = function(path, fileTypes) {
   return join(workingPath, paths.build, path, fileTypes);
 };
 
-isDirectory = function(path) {
+var isDirectory = function(path) {
   var e;
   try {
     return fs.lstatSync(path).isDirectory();
@@ -133,7 +78,7 @@ isDirectory = function(path) {
   }
 };
 
-filesInDir = function(path, ext) {
+var filesInDir = function(path, ext) {
   if (!fs.existsSync(path)) {
     return [];
   }
@@ -150,7 +95,7 @@ try {
   config = {};
 }
 
-highlighter = new Highlights();
+var highlighter = new Highlights();
 
 marked.setOptions({
   highlight: function(code, language) {
@@ -163,9 +108,9 @@ marked.setOptions({
 
 nunjucksDate.setDefaultFormat("MMMM Do YYYY, h:mm:ss a");
 
-nunjucks = {};
+var nunjucks = {};
 
-nunjucksPipe = function() {
+var nunjucksPipe = function() {
   return gulpnunjucks({
     searchPaths: projectPath(paths.templates),
     setUp: function(env) {
@@ -177,7 +122,7 @@ nunjucksPipe = function() {
   });
 };
 
-webpackConfig = {
+var webpackConfig = {
   module: {
     rules: [
       {
@@ -202,12 +147,12 @@ webpackConfig = {
   plugins: [new webpack.webpack.optimize.UglifyJsPlugin()]
 };
 
-imageminOptions = {
+var imageminOptions = {
   quality: process.env.MOONBASE_IMAGEMIN_QUALITY || "65-80",
   speed: process.env.MOONBASE_IMAGEMIN_SPEED || 4
 };
 
-getTotalSizeForFileType = function(path, ext) {
+var getTotalSizeForFileType = function(path, ext) {
   try {
     return execSync(
       "find '" +
@@ -224,7 +169,7 @@ getTotalSizeForFileType = function(path, ext) {
   }
 };
 
-context = {
+var context = {
   nunjucks: nunjucks
 };
 
