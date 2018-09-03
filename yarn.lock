@@ -3246,6 +3246,14 @@ gulp-if@^2.0.0:
     ternary-stream "^2.0.1"
     through2 "^2.0.1"
 
+gulp-imageoptim@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/gulp-imageoptim/-/gulp-imageoptim-1.0.9.tgz#165b99df1af535436ceb022365e6f995eed5c231"
+  dependencies:
+    chalk "^1.1.3"
+    imageoptim-cli "^1.14.9"
+    through2 "^2.0.3"
+
 gulp-match@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/gulp-match/-/gulp-match-1.0.3.tgz#91c7c0d7f29becd6606d57d80a7f8776a87aba8e"
@@ -3698,6 +3706,10 @@ imagemin-pngquant@^4.2.2:
     is-png "^1.0.0"
     pngquant-bin "^3.0.0"
     through2 "^2.0.0"
+
+imageoptim-cli@^1.14.9:
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/imageoptim-cli/-/imageoptim-cli-1.15.4.tgz#ae68ba0ff984ba9602a55afac9db4108b1489287"
 
 immutable@3.8.2, immutable@^3.7.6:
   version "3.8.2"

@@ -13,6 +13,7 @@
     "browser-sync": "^2.23.6",
     "colors": "^1.1.2",
     "commander": "^2.8.1",
+    "cssnano": "^3.10.0",
     "del": "^2.0.2",
     "express": "^4.13.3",
     "fs-extra": "^0.28.0",
@@ -50,8 +51,7 @@
     "st": "^1.1.0",
     "through2": "^2.0.0",
     "vinyl-named": "^1.1.0",
-    "webpack-stream": "^4.0.3",
-    "cssnano": "^3.10.0"
+    "webpack-stream": "^4.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

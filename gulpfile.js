@@ -277,7 +277,7 @@ gulp.task("server", function(cb) {
   });
 });
 
-gulp.task("report", function() {
+gulp.task("report", ["stylelint"], function() {
   commonResetClasses = [
     "applet",
     "blockquote",
