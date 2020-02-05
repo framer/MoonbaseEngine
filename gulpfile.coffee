@@ -2,7 +2,7 @@ _ = require "lodash"
 {join} = require "path"
 fs = require "fs-extra"
 {execSync} = require "child_process"
-https = require "https"
+http = require "http"
 
 ip = require "ip"
 gulp = require "gulp"
@@ -298,25 +298,17 @@ gulp.task "server", (cb) ->
 		portfinder.basePort = 10000
 		portfinder.getPort (err, livereloadPort)  ->
 
-			sslKey = "#{__dirname}/ssl/key.pem"
-			sslCert = "#{__dirname}/ssl/cert.pem"
-
 			app = express()
 			app.use(lr(port:livereloadPort))
 			app.use(express.static(buildPath()))
-			https.createServer({
-				key: fs.readFileSync(sslKey),
-				cert: fs.readFileSync(sslCert)
-			}, app).listen(serverPort)
+			http.createServer(app).listen(serverPort)
 
 			livereload.listen({
 				port: livereloadPort,
-				basePath: buildPath(),
-				key: fs.readFileSync(sslKey),
-				cert: fs.readFileSync(sslCert)
+				basePath: buildPath()
 			})
 
-			gutil.log(gutil.colors.green("Serving at: https://#{ip.address()}:#{serverPort}"))
+			gutil.log(gutil.colors.green("Serving at: http://#{ip.address()}:#{serverPort}"))
 			gutil.log(gutil.colors.green("From path:  #{buildPath()}"))
 
 			cb(err)
